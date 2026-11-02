@@ -1,16 +1,30 @@
 # REIS-105M1 Digital Pulse Reflectometer Simulator
 
+[![.NET 8.0](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20WPF-0078D6?logo=windows&logoColor=white)](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/)
+[![Tests](https://img.shields.io/badge/Tests-xUnit-blue)](https://xunit.net/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 An interactive virtual trainer and digital simulation of the portable pulse reflectometer (Time-Domain Reflectometer / TDR) **REIS-105M1**, built on **.NET 8 (WPF)**. The project includes a physical/mathematical cable line model, a 128x64 monochrome virtual LCD screen buffer, and an interactive 2D desktop scene with animated cable connections and smooth camera zoom.
 
 ---
 
-## Repository Description
+## 📌 Repository Overview & Keywords
 
-**REIS-105M1 Simulator** is a specialized educational and industrial simulation software designed to emulate the operational workflow, controls, display metrics, and reflectometry physics of the REIS-105M1 cable fault locator. It provides electrical engineers, telecommunication technicians, and students with an authentic hands-on experience in detecting cable discontinuities (open circuits, short circuits, impedance mismatches), measuring fault distances, and calibrating velocity of propagation (VOP) parameters without requiring physical hardware or damaged transmission lines.
+> **Short Description (GitHub About):**
+> *Digital simulation and virtual trainer for the REIS-105M1 pulse reflectometer (TDR) built with .NET 8 (WPF), featuring realistic cable line physics, a 128x64 LCD raster engine, and interactive 2D animations.*
+
+### 🏷️ Topic Tags & Keywords
+`pulse-reflectometer` `tdr-simulator` `reis-105m1` `cable-fault-locator` `time-domain-reflectometry` `physics-simulation` `dotnet8` `wpf` `csharp12` `lcd-emulator` `writeablebitmap` `clean-architecture` `xunit`
+
+### 🎯 Purpose & Applications
+- **Hands-on Education & Training:** Teaches telecommunication and electrical engineers how to operate pulse reflectometers without needing expensive lab equipment or damaged cables.
+- **Cable Fault Localization:** Simulates detection of open circuits ($k = +1$), short circuits ($k = -1$), and impedance mismatches with attenuation and noise.
+- **Accurate Physical Modeling:** Calculates distance via two-way propagation delay $L = \frac{v \cdot \Delta t}{2}$ with customizable velocity of propagation (VOP) / shortening factors.
 
 ---
 
-## Solution Architecture
+## 🏛️ Solution Architecture
 
 The solution adheres to clean architecture principles and is divided into modular, decoupled libraries:
 
@@ -31,7 +45,7 @@ Reis105M1/
 ### Module Breakdown
 
 1. **`Reis105M1.Core`** (`net8.0-windows`):
-   - `DeviceState`: Manages device power, active measurement range, velocity of propagation / shortening factor ($VOP$), digital gain (in dB), and cursor positions.
+   - `DeviceState`: Manages device power, active measurement range, velocity factor ($VOP$), digital gain (0–80 dB), and cursor positions.
    - `ReflectometryEngine`: Synthesizes realistic TDR traces based on electromagnetic wave propagation, signal delays ($L = \frac{v \cdot \Delta t}{2}$), exponential cable attenuation, Gaussian noise, and boundary reflection coefficients for various defect types (open circuit, short circuit, impedance mismatches).
    - `MenuStateMachine`: Implements a deterministic finite state machine (FSM) handling front-panel keypad inputs, mode switching, and parameter modifications.
 
@@ -50,7 +64,7 @@ Reis105M1/
 
 ---
 
-## Technology Stack
+## 💻 Technology Stack
 
 - **Platform:** .NET 8.0 (Windows Desktop / WPF)
 - **Language:** C# 12
@@ -59,7 +73,7 @@ Reis105M1/
 
 ---
 
-## Build & Getting Started
+## 🚀 Build & Getting Started
 
 ### Prerequisites
 - [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) or higher
@@ -68,7 +82,7 @@ Reis105M1/
 ### CLI Commands
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/RaccoonKa/Reis105M1.git
 cd Reis105M1
 
 # Restore NuGet dependencies & build solution
@@ -84,7 +98,7 @@ dotnet run --project src/Reis105M1.UI/Reis105M1.UI.csproj
 
 ---
 
-## Branching Strategy (Git Flow)
+## 🌿 Branching Strategy (Git Flow)
 
 - `main` — Production-ready, stable releases.
 - `develop` — Active integration and staging branch.
