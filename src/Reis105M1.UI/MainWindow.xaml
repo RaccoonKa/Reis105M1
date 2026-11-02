@@ -1,0 +1,142 @@
+<Window x:Class="Reis105M1.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Reis105M1.UI"
+        mc:Ignorable="d"
+        Title="Симулятор импульсного рефлектометра РЕЙС-105М1"
+        Height="720" Width="1024"
+        WindowStartupLocation="CenterScreen"
+        Background="#1E1E24">
+
+    <Window.Resources>
+        <!-- Стили кнопок панели прибора -->
+        <Style x:Key="DevicePanelButton" TargetType="Button">
+            <Setter Property="Background" Value="#33383B" />
+            <Setter Property="Foreground" Value="#EEEEEE" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="BorderBrush" Value="#222527" />
+            <Setter Property="BorderThickness" Value="1.5" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#454C50" />
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#262A2C" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid ClipToBounds="True">
+        <!-- Верхняя панель управления симуляцией и камерой -->
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="16" Panel.ZIndex="10">
+            <Button Content="🔌 Подключить кабель" Click="OnConnectCableClicked" Margin="0,0,8,0" Padding="12,6" />
+            <Button Content="🔍 Приблизить камеру (Zoom)" Click="OnZoomCameraClicked" Margin="0,0,8,0" Padding="12,6" />
+            <Button Content="🔄 Сброс камеры" Click="OnResetCameraClicked" Padding="12,6" />
+        </StackPanel>
+
+        <!-- Основная 2D сцена (стол, кабель, прибор) -->
+        <Canvas x:Name="SceneCanvas" Width="1000" Height="680" ClipToBounds="True">
+            <Canvas.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform x:Name="CameraScale" ScaleX="1.0" ScaleY="1.0" CenterX="500" CenterY="340" />
+                    <TranslateTransform x:Name="CameraTranslate" X="0" Y="0" />
+                </TransformGroup>
+            </Canvas.RenderTransform>
+
+            <!-- Фон рабочего стола -->
+            <Rectangle Canvas.Left="40" Canvas.Top="40" Width="920" Height="600" RadiusX="12" RadiusY="12">
+                <Rectangle.Fill>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#2A2E35" Offset="0" />
+                        <GradientStop Color="#1A1C20" Offset="1" />
+                    </LinearGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+
+            <!-- Линия кабеля -->
+            <Path x:Name="CablePath" Stroke="#C87D20" StrokeThickness="7" Canvas.Left="0" Canvas.Top="0">
+                <Path.Data>
+                    <PathGeometry>
+                        <PathFigure StartPoint="160, 480">
+                            <BezierSegment Point1="260, 480" Point2="300, 320" Point3="410, 320" />
+                        </PathFigure>
+                    </PathGeometry>
+                </Path.Data>
+            </Path>
+
+            <!-- Кабельный штекер BNC (анимируется) -->
+            <Canvas x:Name="CablePlug" Canvas.Left="350" Canvas.Top="308">
+                <Rectangle Width="50" Height="24" Fill="#A0A5AA" RadiusX="3" RadiusY="3" Stroke="#555" StrokeThickness="1" />
+                <Rectangle Width="14" Height="14" Canvas.Left="45" Canvas.Top="5" Fill="#D0A33B" RadiusX="2" RadiusY="2" />
+            </Canvas>
+
+            <!-- Корпус прибора РЕЙС-105М1 -->
+            <Canvas x:Name="DeviceBody" Canvas.Left="420" Canvas.Top="120" Width="440" Height="440">
+                <!-- Внешний кожух -->
+                <Rectangle Width="440" Height="440" RadiusX="16" RadiusY="16" Fill="#4B5358" Stroke="#202224" StrokeThickness="4">
+                    <Rectangle.Effect>
+                        <DropShadowEffect BlurRadius="20" ShadowDepth="10" Direction="315" Color="#000000" Opacity="0.6"/>
+                    </Rectangle.Effect>
+                </Rectangle>
+
+                <!-- Лицевая панель -->
+                <Rectangle Canvas.Left="15" Canvas.Top="15" Width="410" Height="410" RadiusX="10" RadiusY="10" Fill="#373D41" Stroke="#1E2022" StrokeThickness="2" />
+                <TextBlock Canvas.Left="30" Canvas.Top="25" Text="РЕЙС-105М1" Foreground="#EEEEEE" FontWeight="Bold" FontSize="18" />
+                <TextBlock Canvas.Left="30" Canvas.Top="47" Text="ИМПУЛЬСНЫЙ РЕФЛЕКТОМЕТР" Foreground="#9BA3A8" FontWeight="SemiBold" FontSize="9" />
+
+                <!-- Гнездо подключения BNC -->
+                <Ellipse Canvas.Left="-16" Canvas.Top="188" Width="24" Height="24" Fill="#60666B" Stroke="#151718" StrokeThickness="2" />
+                <Ellipse Canvas.Left="-10" Canvas.Top="194" Width="12" Height="12" Fill="#D0A33B" />
+
+                <!-- Окно дисплея 128x64 -->
+                <Border Canvas.Left="75" Canvas.Top="75" Width="260" Height="150" Background="#111512" BorderBrush="#202521" BorderThickness="4" CornerRadius="6">
+                    <Image x:Name="LcdImage" Stretch="Fill" RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                </Border>
+
+                <!-- Интерактивный слой кнопок управления -->
+                <!-- Кнопка питания -->
+                <Button Canvas.Left="345" Canvas.Top="35" Width="60" Height="28" Content="ВКЛ" Style="{StaticResource DevicePanelButton}" Click="OnPowerButtonClicked" Background="#9E2A2B" />
+
+                <!-- Клавиатура прибора -->
+                <UniformGrid Canvas.Left="55" Canvas.Top="245" Width="330" Height="165" Rows="4" Columns="4">
+                    <Button Content="ДИАП +" Style="{StaticResource DevicePanelButton}" Click="OnRangePlusClicked" Margin="3" />
+                    <Button Content="ДИАП -" Style="{StaticResource DevicePanelButton}" Click="OnRangeMinusClicked" Margin="3" />
+                    <Button Content="УСИЛ +" Style="{StaticResource DevicePanelButton}" Click="OnGainPlusClicked" Margin="3" />
+                    <Button Content="УСИЛ -" Style="{StaticResource DevicePanelButton}" Click="OnGainMinusClicked" Margin="3" />
+
+                    <Button Content="КУ +" Style="{StaticResource DevicePanelButton}" Click="OnShorteningPlusClicked" Margin="3" />
+                    <Button Content="КУ -" Style="{StaticResource DevicePanelButton}" Click="OnShorteningMinusClicked" Margin="3" />
+                    <Button Content="КУРСОР" Style="{StaticResource DevicePanelButton}" Click="OnCursorToggleClicked" Margin="3" />
+                    <Button Content="РЕЖИМ" Style="{StaticResource DevicePanelButton}" Click="OnModeClicked" Margin="3" />
+
+                    <Button Content="◀ ЛЕВО" Style="{StaticResource DevicePanelButton}" Click="OnCursorLeftClicked" Margin="3" />
+                    <Button Content="ПРАВО ▶" Style="{StaticResource DevicePanelButton}" Click="OnCursorRightClicked" Margin="3" />
+                    <Button Content="ПАМЯТЬ" Style="{StaticResource DevicePanelButton}" Margin="3" />
+                    <Button Content="ВВОД" Style="{StaticResource DevicePanelButton}" Margin="3" />
+
+                    <Button Content="F1" Style="{StaticResource DevicePanelButton}" Margin="3" />
+                    <Button Content="F2" Style="{StaticResource DevicePanelButton}" Margin="3" />
+                    <Button Content="F3" Style="{StaticResource DevicePanelButton}" Margin="3" />
+                    <Button Content="МЕНЮ" Style="{StaticResource DevicePanelButton}" Margin="3" />
+                </UniformGrid>
+            </Canvas>
+        </Canvas>
+    </Grid>
+</Window>
