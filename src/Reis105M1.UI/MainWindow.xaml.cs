@@ -7,9 +7,6 @@ using Reis105M1.Display;
 
 namespace Reis105M1.UI;
 
-/// <summary>
-/// Interaction logic for MainWindow.xaml
-/// </summary>
 public partial class MainWindow : Window
 {
     private readonly DeviceState _state;
@@ -103,15 +100,27 @@ public partial class MainWindow : Window
         RenderScreen();
     }
 
-    private void OnShorteningPlusClicked(object sender, RoutedEventArgs e)
+    private void OnZoomPlusClicked(object sender, RoutedEventArgs e)
     {
-        _stateMachine.HandleInput(DeviceButton.ShorteningPlus);
+        _state.ZoomFactor = Math.Min(64, _state.ZoomFactor * 2);
         RenderScreen();
     }
 
-    private void OnShorteningMinusClicked(object sender, RoutedEventArgs e)
+    private void OnZoomMinusClicked(object sender, RoutedEventArgs e)
     {
-        _stateMachine.HandleInput(DeviceButton.ShorteningMinus);
+        _state.ZoomFactor = Math.Max(1, _state.ZoomFactor / 2);
+        RenderScreen();
+    }
+
+    private void OnNavUpClicked(object sender, RoutedEventArgs e)
+    {
+        _state.VerticalOffsetPercent = Math.Min(100.0, _state.VerticalOffsetPercent + 5.0);
+        RenderScreen();
+    }
+
+    private void OnNavDownClicked(object sender, RoutedEventArgs e)
+    {
+        _state.VerticalOffsetPercent = Math.Max(-100.0, _state.VerticalOffsetPercent - 5.0);
         RenderScreen();
     }
 
@@ -133,9 +142,57 @@ public partial class MainWindow : Window
         RenderScreen();
     }
 
+    private void OnShorteningPlusClicked(object sender, RoutedEventArgs e)
+    {
+        _stateMachine.HandleInput(DeviceButton.ShorteningPlus);
+        RenderScreen();
+    }
+
+    private void OnShorteningMinusClicked(object sender, RoutedEventArgs e)
+    {
+        _stateMachine.HandleInput(DeviceButton.ShorteningMinus);
+        RenderScreen();
+    }
+
     private void OnModeClicked(object sender, RoutedEventArgs e)
     {
         _stateMachine.HandleInput(DeviceButton.ModeSelect);
+        RenderScreen();
+    }
+
+    private void OnTurboClicked(object sender, RoutedEventArgs e)
+    {
+        _state.IsTurbo = !_state.IsTurbo;
+        RenderScreen();
+    }
+
+    private void OnPulsePlusClicked(object sender, RoutedEventArgs e)
+    {
+        RenderScreen();
+    }
+
+    private void OnPulseMinusClicked(object sender, RoutedEventArgs e)
+    {
+        RenderScreen();
+    }
+
+    private void OnMemoryClicked(object sender, RoutedEventArgs e)
+    {
+        RenderScreen();
+    }
+
+    private void OnBacklightClicked(object sender, RoutedEventArgs e)
+    {
+        RenderScreen();
+    }
+
+    private void OnCompensationPlusClicked(object sender, RoutedEventArgs e)
+    {
+        RenderScreen();
+    }
+
+    private void OnCompensationMinusClicked(object sender, RoutedEventArgs e)
+    {
         RenderScreen();
     }
 
@@ -143,16 +200,15 @@ public partial class MainWindow : Window
     {
         _isCableConnected = !_isCableConnected;
 
-        // Анимация подключения штекера BNC к гнезду
-        var targetX = _isCableConnected ? 404.0 : 350.0;
+        var targetY = _isCableConnected ? 104.0 : 55.0;
         var plugAnimation = new DoubleAnimation
         {
-            To = targetX,
-            Duration = TimeSpan.FromMilliseconds(500),
+            To = targetY,
+            Duration = TimeSpan.FromMilliseconds(450),
             EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
         };
 
-        CablePlug.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, plugAnimation);
+        CablePlug.BeginAnimation(System.Windows.Controls.Canvas.TopProperty, plugAnimation);
         RenderScreen();
     }
 
@@ -160,21 +216,14 @@ public partial class MainWindow : Window
     {
         _isZoomed = !_isZoomed;
 
-        var targetScale = _isZoomed ? 1.6 : 1.0;
-        var targetX = _isZoomed ? -120.0 : 0.0;
-        var targetY = _isZoomed ? -50.0 : 0.0;
-        var duration = TimeSpan.FromMilliseconds(650);
+        var targetScale = _isZoomed ? 1.55 : 1.0;
+        var targetY = _isZoomed ? -70.0 : 0.0;
+        var duration = TimeSpan.FromMilliseconds(600);
         var easing = new QuadraticEase { EasingMode = EasingMode.EaseInOut };
 
-        var animScaleX = new DoubleAnimation(targetScale, duration) { EasingFunction = easing };
-        var animScaleY = new DoubleAnimation(targetScale, duration) { EasingFunction = easing };
-        var animTranslateX = new DoubleAnimation(targetX, duration) { EasingFunction = easing };
-        var animTranslateY = new DoubleAnimation(targetY, duration) { EasingFunction = easing };
-
-        CameraScale.BeginAnimation(System.Windows.Media.ScaleTransform.ScaleXProperty, animScaleX);
-        CameraScale.BeginAnimation(System.Windows.Media.ScaleTransform.ScaleYProperty, animScaleY);
-        CameraTranslate.BeginAnimation(System.Windows.Media.TranslateTransform.XProperty, animTranslateX);
-        CameraTranslate.BeginAnimation(System.Windows.Media.TranslateTransform.YProperty, animTranslateY);
+        CameraScale.BeginAnimation(System.Windows.Media.ScaleTransform.ScaleXProperty, new DoubleAnimation(targetScale, duration) { EasingFunction = easing });
+        CameraScale.BeginAnimation(System.Windows.Media.ScaleTransform.ScaleYProperty, new DoubleAnimation(targetScale, duration) { EasingFunction = easing });
+        CameraTranslate.BeginAnimation(System.Windows.Media.TranslateTransform.YProperty, new DoubleAnimation(targetY, duration) { EasingFunction = easing });
     }
 
     private void OnResetCameraClicked(object sender, RoutedEventArgs e)
@@ -184,7 +233,6 @@ public partial class MainWindow : Window
 
         CameraScale.BeginAnimation(System.Windows.Media.ScaleTransform.ScaleXProperty, new DoubleAnimation(1.0, duration));
         CameraScale.BeginAnimation(System.Windows.Media.ScaleTransform.ScaleYProperty, new DoubleAnimation(1.0, duration));
-        CameraTranslate.BeginAnimation(System.Windows.Media.TranslateTransform.XProperty, new DoubleAnimation(0.0, duration));
         CameraTranslate.BeginAnimation(System.Windows.Media.TranslateTransform.YProperty, new DoubleAnimation(0.0, duration));
     }
 }

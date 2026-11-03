@@ -16,8 +16,8 @@ public class LcdDisplayBuffer
     private readonly WriteableBitmap _bitmap;
     private readonly uint[] _colorBuffer;
 
-    private const uint PixelOnColor = 0xFF142010;  // Темно-зеленый / черный ЖК пиксель
-    private const uint PixelOffColor = 0xFF8BA583; // Светло-оливковый фон подсветки
+    private const uint PixelOnColor = 0xFF1C2214;
+    private const uint PixelOffColor = 0xFF9EAC67;
 
     public LcdDisplayBuffer()
     {
