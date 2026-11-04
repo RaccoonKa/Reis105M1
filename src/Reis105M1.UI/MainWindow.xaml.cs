@@ -77,7 +77,23 @@ public partial class MainWindow : Window
                 new List<CableDefect> { new CableDefect(70.0, DefectType.OpenCircuit, 0.9) }
             ),
             new TutorialStep(
-                "Настройка укорочения и диапазона",
+                "Настройка координатной сетки",
+                MeasurementRange.Range100m,
+                1.500,
+                0.0,
+                70.0,
+                new List<CableDefect> { new CableDefect(70.0, DefectType.OpenCircuit, 0.9) }
+            ),
+            new TutorialStep(
+                "Библиотека кабелей и выбор КУ",
+                MeasurementRange.Range100m,
+                1.500,
+                0.0,
+                70.0,
+                new List<CableDefect> { new CableDefect(70.0, DefectType.OpenCircuit, 0.9) }
+            ),
+            new TutorialStep(
+                "Настройка усиления и диапазона",
                 MeasurementRange.Range100m,
                 1.500,
                 5.0,
@@ -234,9 +250,11 @@ public partial class MainWindow : Window
                     ? "Присоединительный кабель подключен к разъему ВХОД 2 на верхнем торце. Прибор проводит одиночные измерения через ВХОД 2 с той же точностью, что и через ВХОД 1 — схема входов полностью равнозначна. Разделение на два входа служит для режимов 'Сравнение', 'Разность' и 'Раздельный'."
                     : "Присоединительный кабель подключен к разъему ВХОД 1 на верхнем торце. Сигнал от катушки поступает в первый измерительный тракт. Вы также можете переключить провод на ВХОД 2 — для одиночного поиска обрыва или КЗ оба входа работают идентично.",
             2 => $"При нажатии кнопки питания прибор проводит внутреннюю автокалибровку. На монохромном ЖК-дисплее 128x64 формируется координатная сетка и линия нуля. Отраженный сигнал от измерительной катушки принимается трактом {portName}.",
-            3 => $"Скорость электромагнитной волны в кабеле зависит от материала изоляции (V = c / γ). Для радиочастотных кабелей и связи коэффициент укорочения равен γ ≈ 1.500. Диапазон развертки для канала {portName} подбирается так, чтобы отраженный сигнал от конца линии полностью помещался на экране.",
-            4 => $"При обрыве или разомкнутом конце линии отраженный импульс имеет ту же полярность, что и зондирующий (направлен вверх). Рефлектометр по каналу {portName} регистрирует импульс обрыва на дистанции L = 65.0 м. Курсор 0 совмещается с началом импульса, курсор 1 — с фронтом отражения.",
-            5 => $"При коротком замыкании между жилами или жилы на броню отраженный импульс меняет полярность на противоположную (направлен строго вниз). На канале {portName} курсор 1 наводится на начало перегиба импульса КЗ, и оператор получает точную дистанцию L = 42.5 м до аварийного участка.",
+            3 => $"Координатная сетка дисплея для канала {portName} переключается кнопкой '⊞ Сетка' между 3 режимами: 1) Засечки (быстрая визуальная шкала делений через каждые 16 пикселей); 2) Клетки (полная сетка 8х4 для измерения амплитуды в вольтах); 3) Без сетки (чистый экран для поиска мелких дефектов без визуальных помех).",
+            4 => $"Для точного вычисления дистанции по каналу {portName} необходимо установить коэффициент укорочения (КУ). В приборе есть энергонезависимая память до 64 типов линий. Кликните '📚 Кабели' чтобы открыть встроенную библиотеку марок (РК-50, РК-75, ФКБ, воздушные линии) и посмотреть их значения.",
+            5 => $"Скорость электромагнитной волны в кабеле зависит от материала изоляции (V = c / γ). Для радиочастотных кабелей и связи коэффициент укорочения равен γ ≈ 1.500. Диапазон развертки для канала {portName} подбирается так, чтобы отраженный сигнал от конца линии полностью помещался на экране.",
+            6 => $"При обрыве или разомкнутом конце линии отраженный импульс имеет ту же полярность, что и зондирующий (направлен вверх). Рефлектометр по каналу {portName} регистрирует импульс обрыва на дистанции L = 65.0 м. Курсор 0 совмещается с началом импульса, курсор 1 — с фронтом отражения.",
+            7 => $"При коротком замыкании между жилами или жилы на броню отраженный импульс меняет полярность на противоположную (направлен строго вниз). На канале {portName} курсор 1 наводится на начало перегиба импульса КЗ, и оператор получает точную дистанцию L = 42.5 м до аварийного участка.",
             _ => string.Empty
         };
     }
@@ -257,6 +275,23 @@ public partial class MainWindow : Window
             _selectedPort = 1;
         }
 
+        if (index == 3)
+        {
+            _lcdBuffer.ScreenMode = LcdScreenMode.Trace;
+            _lcdBuffer.GridMode = LcdGridMode.FullGrid;
+            UpdateScreenModeButtons();
+        }
+        else if (index == 4)
+        {
+            _lcdBuffer.ScreenMode = LcdScreenMode.CableTable;
+            UpdateScreenModeButtons();
+        }
+        else
+        {
+            _lcdBuffer.ScreenMode = LcdScreenMode.Trace;
+            UpdateScreenModeButtons();
+        }
+
         TxtStepHeader.Text = $"Этап {index + 1} из {_steps.Count}";
         TxtStepTitle.Text = step.Title;
         TxtStepDescription.Text = GetStepDescription(index, activePort);
@@ -273,6 +308,12 @@ public partial class MainWindow : Window
         TxtInfoRange.Text = $"{ReflectometryEngine.GetMaxDistanceMeters(_state.Range):F1} м";
         TxtInfoShortening.Text = $"{_state.ShorteningFactor:F3}";
         TxtInfoDistance.Text = $"{_state.MeasuredDistance:F2} м";
+        TxtInfoGrid.Text = _lcdBuffer.GridMode switch
+        {
+            LcdGridMode.Ticks => "Засечки",
+            LcdGridMode.FullGrid => "Клетки",
+            _ => "Без сетки"
+        };
 
         SetCablePort(activePort);
 
@@ -290,19 +331,42 @@ public partial class MainWindow : Window
 
         if (_state.IsPoweredOn)
         {
-            _lcdBuffer.DrawGrid();
-
-            if (_selectedPort > 0 && _currentStepIndex > 0)
+            switch (_lcdBuffer.ScreenMode)
             {
-                var trace = _engine.GenerateTrace(_state, _currentDefects, samplesCount: 128);
-                _lcdBuffer.DrawTrace(trace, baselineY: 36, scale: 22.0);
+                case LcdScreenMode.MainMenu:
+                    _lcdBuffer.DrawMainMenuScreen(0);
+                    break;
+                case LcdScreenMode.CableTable:
+                    _lcdBuffer.DrawCableTableScreen(3);
+                    break;
+                case LcdScreenMode.Parameters:
+                    _lcdBuffer.DrawParametersScreen(_state);
+                    break;
+                case LcdScreenMode.Battery:
+                    _lcdBuffer.DrawBatteryScreen(100);
+                    break;
+                default:
+                    _lcdBuffer.DrawGrid();
+                    _lcdBuffer.DrawText($"КУ:{_state.ShorteningFactor:F3}", 2, 2);
+                    _lcdBuffer.DrawText(_selectedPort == 2 ? "ВХОД 2" : "ВХОД 1", 64, 2);
+                    _lcdBuffer.DrawBatteryIcon(112, 2);
 
-                var maxDist = ReflectometryEngine.GetMaxDistanceMeters(_state.Range);
-                var cursor1Pixel = (int)(_state.Cursor1Position / maxDist * LcdDisplayBuffer.ScreenWidth);
-                var cursor2Pixel = (int)(_state.Cursor2Position / maxDist * LcdDisplayBuffer.ScreenWidth);
+                    if (_selectedPort > 0 && _currentStepIndex > 0)
+                    {
+                        var trace = _engine.GenerateTrace(_state, _currentDefects, samplesCount: 128);
+                        _lcdBuffer.DrawTrace(trace, baselineY: 34, scale: 20.0);
 
-                _lcdBuffer.DrawCursor(cursor1Pixel, isDotted: false);
-                _lcdBuffer.DrawCursor(cursor2Pixel, isDotted: true);
+                        var maxDist = ReflectometryEngine.GetMaxDistanceMeters(_state.Range);
+                        var cursor1Pixel = (int)(_state.Cursor1Position / maxDist * LcdDisplayBuffer.ScreenWidth);
+                        var cursor2Pixel = (int)(_state.Cursor2Position / maxDist * LcdDisplayBuffer.ScreenWidth);
+
+                        _lcdBuffer.DrawCursor(cursor1Pixel, isDotted: false);
+                        _lcdBuffer.DrawCursor(cursor2Pixel, isDotted: true);
+                    }
+
+                    _lcdBuffer.DrawText($"L={_state.MeasuredDistance:F2}м", 2, 54);
+                    _lcdBuffer.DrawText("КУРСОР 1", 76, 54, invert: true);
+                    break;
             }
         }
 
@@ -358,11 +422,11 @@ public partial class MainWindow : Window
         CablePlug.BeginAnimation(Canvas.TopProperty, animY);
 
         var p2X = port == 2 ? 663.0 : 557.0;
-        var p1X = port == 2 ? 320.0 : 297.0;
+        var p1X = port == 2 ? 310.0 : 268.0;
 
         var animCableP3 = new PointAnimation(new Point(endX, targetY), duration) { EasingFunction = ease };
         var animCableP2 = new PointAnimation(new Point(p2X, targetY - 66), duration) { EasingFunction = ease };
-        var animCableP1 = new PointAnimation(new Point(p1X, 267), duration) { EasingFunction = ease };
+        var animCableP1 = new PointAnimation(new Point(p1X, 248), duration) { EasingFunction = ease };
 
         var animShadowP3 = new PointAnimation(new Point(endX, targetY + 10), duration) { EasingFunction = ease };
         var animShadowP2 = new PointAnimation(new Point(p2X, targetY - 56), duration) { EasingFunction = ease };
@@ -381,6 +445,66 @@ public partial class MainWindow : Window
         TxtStepDescription.Text = GetStepDescription(_currentStepIndex, _selectedPort);
 
         RenderScreen();
+    }
+
+    private void OnScreenTraceClicked(object sender, RoutedEventArgs e)
+    {
+        _lcdBuffer.ScreenMode = LcdScreenMode.Trace;
+        UpdateScreenModeButtons();
+        RenderScreen();
+    }
+
+    private void OnGridToggleClicked(object sender, RoutedEventArgs e)
+    {
+        _lcdBuffer.ScreenMode = LcdScreenMode.Trace;
+        _lcdBuffer.GridMode = _lcdBuffer.GridMode switch
+        {
+            LcdGridMode.Ticks => LcdGridMode.FullGrid,
+            LcdGridMode.FullGrid => LcdGridMode.None,
+            _ => LcdGridMode.Ticks
+        };
+
+        TxtInfoGrid.Text = _lcdBuffer.GridMode switch
+        {
+            LcdGridMode.Ticks => "Засечки",
+            LcdGridMode.FullGrid => "Клетки",
+            _ => "Без сетки"
+        };
+
+        UpdateScreenModeButtons();
+        RenderScreen();
+    }
+
+    private void OnScreenMenuClicked(object sender, RoutedEventArgs e)
+    {
+        _lcdBuffer.ScreenMode = LcdScreenMode.MainMenu;
+        UpdateScreenModeButtons();
+        RenderScreen();
+    }
+
+    private void OnScreenCablesClicked(object sender, RoutedEventArgs e)
+    {
+        _lcdBuffer.ScreenMode = LcdScreenMode.CableTable;
+        UpdateScreenModeButtons();
+        RenderScreen();
+    }
+
+    private void OnScreenParamsClicked(object sender, RoutedEventArgs e)
+    {
+        _lcdBuffer.ScreenMode = LcdScreenMode.Parameters;
+        UpdateScreenModeButtons();
+        RenderScreen();
+    }
+
+    private void UpdateScreenModeButtons()
+    {
+        var activeBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2563EB"));
+        var normalBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#475569"));
+
+        BtnScreenTrace.Background = _lcdBuffer.ScreenMode == LcdScreenMode.Trace ? activeBrush : normalBrush;
+        BtnScreenMenu.Background = _lcdBuffer.ScreenMode == LcdScreenMode.MainMenu ? activeBrush : normalBrush;
+        BtnScreenCables.Background = _lcdBuffer.ScreenMode == LcdScreenMode.CableTable ? activeBrush : normalBrush;
+        BtnScreenParams.Background = _lcdBuffer.ScreenMode == LcdScreenMode.Parameters ? activeBrush : normalBrush;
     }
 
     private void OnKeyInspectClicked(object sender, RoutedEventArgs e)
@@ -439,6 +563,16 @@ public partial class MainWindow : Window
         {
             ApplyStep(StepsListBox.SelectedIndex);
         }
+    }
+
+    private void OnAboutClicked(object sender, RoutedEventArgs e)
+    {
+        AboutModal.Visibility = Visibility.Visible;
+    }
+
+    private void OnCloseAboutClicked(object sender, RoutedEventArgs e)
+    {
+        AboutModal.Visibility = Visibility.Collapsed;
     }
 
     private void OnCloseAppClicked(object sender, RoutedEventArgs e)
