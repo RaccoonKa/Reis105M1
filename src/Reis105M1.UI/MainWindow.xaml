@@ -4,14 +4,56 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Интерактивный демонстрационный стенд: РЕЙС-105М1"
-        Height="820" Width="1120"
-        WindowStartupLocation="CenterScreen"
-        Background="#181A1E">
+        Title="Интерактивный обучающий комплекс: РЕЙС-105М1"
+        WindowState="Maximized"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        Background="#323846">
 
     <Window.Resources>
-        <!-- Базовый стиль для одиночных клавиш с выпуклым тактильным куполом -->
-        <Style x:Key="BubbleKey" TargetType="Button">
+        <Style x:Key="ModernScrollThumb" TargetType="{x:Type Thumb}">
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="IsTabStop" Value="false"/>
+            <Setter Property="Focusable" Value="false"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Thumb}">
+                        <Border x:Name="thumbBorder" CornerRadius="3" Background="#475569" Width="6"/>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="thumbBorder" Property="Background" Value="#64748B"/>
+                            </Trigger>
+                            <Trigger Property="IsDragging" Value="True">
+                                <Setter TargetName="thumbBorder" Property="Background" Value="#38BDF8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="{x:Type ScrollBar}">
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="Width" Value="6"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ScrollBar}">
+                        <Grid Background="Transparent">
+                            <Track x:Name="PART_Track" IsDirectionReversed="true">
+                                <Track.Thumb>
+                                    <Thumb Style="{StaticResource ModernScrollThumb}"/>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="InspectorKey" TargetType="Button">
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
@@ -19,13 +61,11 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Grid>
-                            <!-- Внешняя синяя рамка клавиши -->
                             <Border x:Name="outerBorder" 
                                     Background="#ECE8DE" 
                                     BorderBrush="#0A369D" 
                                     BorderThickness="1.5" 
                                     CornerRadius="6">
-                                <!-- Выпуклый тактильный пузырек (мембранный купол) -->
                                 <Border x:Name="bubble" CornerRadius="4" Margin="2">
                                     <Border.Background>
                                         <RadialGradientBrush Center="0.35,0.25" RadiusX="0.85" RadiusY="0.85">
@@ -40,7 +80,8 @@
                         </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="outerBorder" Property="BorderBrush" Value="#D81159" />
+                                <Setter TargetName="outerBorder" Property="BorderBrush" Value="#0284C7" />
+                                <Setter TargetName="outerBorder" Property="Background" Value="#F8FAFC" />
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="bubble" Property="Margin" Value="2.5,2.5,1.5,1.5" />
@@ -59,8 +100,7 @@
             </Setter>
         </Style>
 
-        <!-- Стиль для внутренних круглых/овальных тактильных кнопок-пузырьков внутри сдвоенных блоков -->
-        <Style x:Key="SubBubbleKey" TargetType="Button">
+        <Style x:Key="InspectorSubKey" TargetType="Button">
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
@@ -79,7 +119,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="bubble" Property="BorderBrush" Value="#D81159" />
+                                <Setter TargetName="bubble" Property="BorderBrush" Value="#0284C7" />
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="bubble" Property="Background" Value="#BCB6A2" />
@@ -89,339 +129,761 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="NavButton" TargetType="Button">
+            <Setter Property="Background" Value="#2563EB" />
+            <Setter Property="Foreground" Value="#FFFFFF" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Padding" Value="16,10" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="btnBorder" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="btnBorder" Property="Background" Value="#3B82F6" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="btnBorder" Property="Background" Value="#1D4ED8" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SecondaryNavButton" BasedOn="{StaticResource NavButton}" TargetType="Button">
+            <Setter Property="Background" Value="#475569" />
+            <Setter Property="Foreground" Value="#F1F5F9" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#64748B" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
 
-    <Grid ClipToBounds="True">
-        <!-- Верхняя панель управления обзором -->
-        <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20" Background="#23272E" CornerRadius="8" Padding="8" Panel.ZIndex="10">
-            <StackPanel Orientation="Horizontal">
-                <Button Content="🔌 Подключить кабель к ВХОД 1" Click="OnConnectCableClicked" Margin="0,0,8,0" Padding="12,6" />
-                <Button Content="🔍 Приблизить прибор" Click="OnZoomCameraClicked" Margin="0,0,8,0" Padding="12,6" />
-                <Button Content="🔄 Общий вид" Click="OnResetCameraClicked" Padding="12,6" />
-            </StackPanel>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="56" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="#262B35" BorderBrush="#3D4554" BorderThickness="0,0,0,1" Padding="20,0">
+            <Grid>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Background="#2563EB" CornerRadius="6" Width="28" Height="28" Margin="0,0,10,0">
+                        <TextBlock Text="∿" Foreground="White" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-2,0,0"/>
+                    </Border>
+                    <TextBlock Text="РЕЙС-105М1" Foreground="#FFFFFF" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <Border Background="#374151" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                        <TextBlock Text="ОБУЧАЮЩИЙ СТЕНД" Foreground="#9CA3AF" FontWeight="Bold" FontSize="10"/>
+                    </Border>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button Content="ℹ О программе" Click="OnAboutClicked" Style="{StaticResource SecondaryNavButton}" Padding="12,6" FontSize="11" Margin="0,0,8,0"/>
+                    <Button Content="Свернуть" Click="OnMinimizeAppClicked" Style="{StaticResource SecondaryNavButton}" Padding="12,6" FontSize="11" Margin="0,0,8,0"/>
+                    <Button Content="✕ Выход" Click="OnCloseAppClicked" Style="{StaticResource NavButton}" Background="#DC2626" Padding="14,6" FontSize="11"/>
+                </StackPanel>
+            </Grid>
         </Border>
 
-        <!-- 2D Canvas Сцена -->
-        <Canvas x:Name="SceneCanvas" Width="1120" Height="820" ClipToBounds="True">
-            <Canvas.RenderTransform>
-                <TransformGroup>
-                    <ScaleTransform x:Name="CameraScale" ScaleX="1.0" ScaleY="1.0" CenterX="560" CenterY="410" />
-                    <TranslateTransform x:Name="CameraTranslate" X="0" Y="0" />
-                </TransformGroup>
-            </Canvas.RenderTransform>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="430" />
+            </Grid.ColumnDefinitions>
 
-            <!-- Фон монтажного стола лаборатории -->
-            <Rectangle Canvas.Left="30" Canvas.Top="30" Width="1060" Height="750" RadiusX="14" RadiusY="14">
-                <Rectangle.Fill>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop Color="#2C313A" Offset="0" />
-                        <GradientStop Color="#1E2227" Offset="1" />
-                    </LinearGradientBrush>
-                </Rectangle.Fill>
-            </Rectangle>
+            <Viewbox Grid.Column="0" Stretch="Uniform" Margin="24">
+                <Canvas x:Name="SceneCanvas" Width="1120" Height="820" ClipToBounds="True">
+                    <Rectangle Canvas.Left="30" Canvas.Top="30" Width="1060" Height="750" RadiusX="18" RadiusY="18">
+                        <Rectangle.Fill>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#60697B" Offset="0" />
+                                <GradientStop Color="#4A5262" Offset="1" />
+                            </LinearGradientBrush>
+                        </Rectangle.Fill>
+                        <Rectangle.Effect>
+                            <DropShadowEffect BlurRadius="30" ShadowDepth="8" Direction="270" Color="#000000" Opacity="0.3"/>
+                        </Rectangle.Effect>
+                    </Rectangle>
 
-            <!-- Линия измеряемого кабеля (подходит сверху) -->
-            <Path Stroke="#D37E2A" StrokeThickness="8" Canvas.Left="0" Canvas.Top="0">
-                <Path.Data>
-                    <PathGeometry>
-                        <PathFigure StartPoint="220, 30">
-                            <BezierSegment Point1="330, 30" Point2="480, 40" Point3="502, 90" />
-                        </PathFigure>
-                    </PathGeometry>
-                </Path.Data>
-            </Path>
+                    <Canvas Canvas.Left="40" Canvas.Top="110" Width="360" Height="500">
+                        <Ellipse Canvas.Left="20" Canvas.Top="415" Width="240" Height="40" Fill="#1E232D" Opacity="0.4">
+                            <Ellipse.Effect>
+                                <BlurEffect Radius="15"/>
+                            </Ellipse.Effect>
+                        </Ellipse>
 
-            <!-- BNC-штекер кабеля -->
-            <Canvas x:Name="CablePlug" Canvas.Left="490" Canvas.Top="50">
-                <Rectangle Width="24" Height="42" Fill="#B0B5BA" RadiusX="3" RadiusY="3" Stroke="#444" StrokeThickness="1.5" />
-                <Rectangle Width="14" Height="10" Canvas.Left="5" Canvas.Top="38" Fill="#C59B27" RadiusX="2" RadiusY="2" />
-            </Canvas>
+                        <Rectangle Canvas.Left="45" Canvas.Top="435" Width="170" Height="12" Fill="#1E242E" RadiusX="4" RadiusY="4"/>
+                        <Rectangle Canvas.Left="40" Canvas.Top="443" Width="35" Height="6" Fill="#0F172A" RadiusX="2" RadiusY="2"/>
+                        <Rectangle Canvas.Left="180" Canvas.Top="443" Width="35" Height="6" Fill="#0F172A" RadiusX="2" RadiusY="2"/>
 
-            <!-- Корпус прибора РЕЙС-105М1 -->
-            <Canvas x:Name="DeviceBody" Canvas.Left="410" Canvas.Top="130" Width="280" Height="620">
+                        <Path Stroke="#334155" StrokeThickness="14" StrokeStartLineCap="Round" StrokeEndLineCap="Round" 
+                              Data="M 70,435 L 130,165 L 190,435"/>
+                        <Line X1="85" Y1="365" X2="175" Y2="365" Stroke="#334155" StrokeThickness="7"/>
 
-                <!-- Разъемы на верхнем торце -->
-                <!-- ВХОД 1 -->
-                <Rectangle Canvas.Left="75" Canvas.Top="-18" Width="24" Height="22" Fill="#B8BDC2" Stroke="#4A4E53" StrokeThickness="1.5" RadiusX="2" RadiusY="2" />
-                <Rectangle Canvas.Left="80" Canvas.Top="-24" Width="14" Height="8" Fill="#8C9196" Stroke="#333" RadiusX="1" RadiusY="1" />
-
-                <!-- Ручка согласования ВЫХОД СОПР -->
-                <Rectangle Canvas.Left="127" Canvas.Top="-24" Width="26" Height="28" Fill="#1E1E20" Stroke="#111" StrokeThickness="2" RadiusX="4" RadiusY="4" />
-                <Line X1="140" Y1="-24" X2="140" Y2="-12" Stroke="#EEEEEE" StrokeThickness="2" />
-
-                <!-- ВХОД 2 -->
-                <Rectangle Canvas.Left="181" Canvas.Top="-18" Width="24" Height="22" Fill="#B8BDC2" Stroke="#4A4E53" StrokeThickness="1.5" RadiusX="2" RadiusY="2" />
-                <Rectangle Canvas.Left="186" Canvas.Top="-24" Width="14" Height="8" Fill="#8C9196" Stroke="#333" RadiusX="1" RadiusY="1" />
-
-                <!-- Корпус: Т-образный пластиковый кожух -->
-                <Path Fill="#DAD6C9" Stroke="#8A8679" StrokeThickness="2">
-                    <Path.Effect>
-                        <DropShadowEffect BlurRadius="25" ShadowDepth="12" Direction="315" Color="#000000" Opacity="0.55"/>
-                    </Path.Effect>
-                    <Path.Data>
-                        <PathGeometry>
-                            <PathFigure StartPoint="15,0" IsClosed="True">
-                                <LineSegment Point="265,0" />
-                                <ArcSegment Point="275,10" Size="10,10" SweepDirection="Clockwise" />
-                                <LineSegment Point="275,160" />
-                                <LineSegment Point="236,215" />
-                                <LineSegment Point="236,575" />
-                                <ArcSegment Point="226,585" Size="10,10" SweepDirection="Clockwise" />
-                                <LineSegment Point="54,585" />
-                                <ArcSegment Point="44,575" Size="10,10" SweepDirection="Clockwise" />
-                                <LineSegment Point="44,215" />
-                                <LineSegment Point="5,160" />
-                                <LineSegment Point="5,10" />
-                                <ArcSegment Point="15,0" Size="10,10" SweepDirection="Clockwise" />
-                            </PathFigure>
-                        </PathGeometry>
-                    </Path.Data>
-                </Path>
-
-                <!-- Окно дисплея -->
-                <Border Canvas.Left="36" Canvas.Top="42" Width="208" Height="114" Background="#3A3D38" CornerRadius="4" Padding="6">
-                    <Border Background="#8F9F58" CornerRadius="2" BorderBrush="#252822" BorderThickness="1.5">
-                        <Image x:Name="LcdImage" Stretch="Fill" RenderOptions.BitmapScalingMode="NearestNeighbor" />
-                    </Border>
-                </Border>
-
-                <!-- Фирменная пленочная клавиатура РЕЙС-105М1 -->
-                <Border Canvas.Left="47" Canvas.Top="216" Width="186" Height="356" Background="#EDE9DE" BorderBrush="#0A369D" BorderThickness="2" CornerRadius="10">
-                    <Canvas>
-
-                        <!-- ================= РЯД 1: ВЕРХНИЕ БЛОКИ НАСТРОЙКИ (Y=10..58) ================= -->
-
-                        <!-- Блок УСИЛЕНИЕ (Лево: X=10, Y=10, W=46, H=48) -->
-                        <Border Canvas.Left="10" Canvas.Top="10" Width="46" Height="48" BorderBrush="#0A369D" BorderThickness="1.5" CornerRadius="6" Background="#ECE8DE">
-                            <StackPanel VerticalAlignment="Center">
-                                <Button Height="17" Width="40" Style="{StaticResource SubBubbleKey}" Click="OnGainPlusClicked">
-                                    <Path Data="M 0,7 L 5,0 L 10,7 Z" Stroke="#0A369D" StrokeThickness="1.3" Fill="Transparent"/>
-                                </Button>
-                                <TextBlock Text="УСИЛЕНИЕ" FontSize="6" FontWeight="Bold" Foreground="#0A369D" HorizontalAlignment="Center" Margin="0,1,0,1"/>
-                                <Button Height="17" Width="40" Style="{StaticResource SubBubbleKey}" Click="OnGainMinusClicked">
-                                    <Path Data="M 0,0 L 5,7 L 10,0 Z" Stroke="#0A369D" StrokeThickness="1.3" Fill="Transparent"/>
-                                </Button>
+                        <Border Canvas.Left="105" Canvas.Top="150" Width="50" Height="18" Background="#0F172A" CornerRadius="9" BorderBrush="#475569" BorderThickness="1">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <Rectangle Width="2" Height="10" Fill="#334155" Margin="2,0"/>
+                                <Rectangle Width="2" Height="10" Fill="#334155" Margin="2,0"/>
+                                <Rectangle Width="2" Height="10" Fill="#334155" Margin="2,0"/>
+                                <Rectangle Width="2" Height="10" Fill="#334155" Margin="2,0"/>
                             </StackPanel>
                         </Border>
 
-                        <!-- Блок ДИАПАЗОН (Центр: X=60, Y=10, W=66, H=48) -->
-                        <Border Canvas.Left="60" Canvas.Top="10" Width="66" Height="48" BorderBrush="#0A369D" BorderThickness="1.5" CornerRadius="6" Background="#ECE8DE">
-                            <Grid>
-                                <TextBlock Text="ДИАПАЗОН" FontSize="6.5" FontWeight="Bold" Foreground="#0A369D" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,4,0,0"/>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,4">
-                                    <Button Width="27" Height="25" Style="{StaticResource SubBubbleKey}" Click="OnRangeMinusClicked" Margin="0,0,2,0">
-                                        <Path Data="M 7,0 L 0,5 L 7,10 Z" Stroke="#0A369D" StrokeThickness="1.3" Fill="Transparent"/>
-                                    </Button>
-                                    <Button Width="27" Height="25" Style="{StaticResource SubBubbleKey}" Click="OnRangePlusClicked" Margin="2,0,0,0">
-                                        <Path Data="M 0,0 L 7,5 L 0,10 Z" Stroke="#0A369D" StrokeThickness="1.3" Fill="Transparent"/>
-                                    </Button>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
+                        <Ellipse Canvas.Left="35" Canvas.Top="215" Width="190" Height="190" Fill="#1E242E" Stroke="#0F172A" StrokeThickness="3"/>
 
-                        <!-- Блок РАСТЯЖКА (Право: X=130, Y=10, W=46, H=48) -->
-                        <Border Canvas.Left="130" Canvas.Top="10" Width="46" Height="48" BorderBrush="#0A369D" BorderThickness="1.5" CornerRadius="6" Background="#ECE8DE">
-                            <StackPanel VerticalAlignment="Center">
-                                <Button Height="17" Width="40" Style="{StaticResource SubBubbleKey}" Click="OnZoomPlusClicked">
-                                    <Path Data="M 0,7 L 5,0 L 10,7 Z" Stroke="#0A369D" StrokeThickness="1.3" Fill="Transparent"/>
-                                </Button>
-                                <TextBlock Text="РАСТЯЖКА" FontSize="6" FontWeight="Bold" Foreground="#0A369D" HorizontalAlignment="Center" Margin="0,1,0,1"/>
-                                <Button Height="17" Width="40" Style="{StaticResource SubBubbleKey}" Click="OnZoomMinusClicked">
-                                    <Path Data="M 0,0 L 5,7 L 10,0 Z" Stroke="#0A369D" StrokeThickness="1.3" Fill="Transparent"/>
-                                </Button>
-                            </StackPanel>
-                        </Border>
+                        <Ellipse Canvas.Left="45" Canvas.Top="225" Width="170" Height="170">
+                            <Ellipse.Fill>
+                                <RadialGradientBrush Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
+                                    <GradientStop Color="#78350F" Offset="0.0"/>
+                                    <GradientStop Color="#451A03" Offset="1.0"/>
+                                </RadialGradientBrush>
+                            </Ellipse.Fill>
+                        </Ellipse>
 
+                        <Ellipse Canvas.Left="45" Canvas.Top="225" Width="170" Height="170" Stroke="#B45309" StrokeThickness="12"/>
+                        <Ellipse Canvas.Left="45" Canvas.Top="225" Width="170" Height="170" Stroke="#F59E0B" StrokeThickness="8"/>
+                        <Ellipse Canvas.Left="45" Canvas.Top="225" Width="170" Height="170" Stroke="#FDE047" StrokeThickness="2" Opacity="0.7"/>
 
-                        <!-- ================= РЯД 2: ЦЕНТРАЛЬНЫЙ ОВАЛЬНЫЙ ЩИТ-ДЖОЙСТИК (Y=62..128) ================= -->
+                        <Ellipse Canvas.Left="55" Canvas.Top="235" Width="150" Height="150" Stroke="#B45309" StrokeThickness="10"/>
+                        <Ellipse Canvas.Left="55" Canvas.Top="235" Width="150" Height="150" Stroke="#D97706" StrokeThickness="6"/>
 
-                        <!-- Общая внешняя контурная овальная дорожка щита -->
-                        <Border Canvas.Left="10" Canvas.Top="62" Width="166" Height="66" CornerRadius="33" BorderBrush="#0A369D" BorderThickness="1.5" Background="#E6E2D4" />
+                        <Ellipse Canvas.Left="65" Canvas.Top="245" Width="130" Height="130" Stroke="#92400E" StrokeThickness="8"/>
+                        <Ellipse Canvas.Left="65" Canvas.Top="245" Width="130" Height="130" Stroke="#B45309" StrokeThickness="4"/>
 
-                        <!-- Стрелка ВЛЕВО (Левое крыло розетки: X=14, Y=68, W=42, H=54) -->
-                        <Button Canvas.Left="14" Canvas.Top="68" Width="42" Height="54" Click="OnCursorLeftClicked">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border BorderBrush="#0A369D" BorderThickness="1.5" CornerRadius="24,4,4,24">
-                                        <Border.Background>
-                                            <RadialGradientBrush Center="0.3,0.3" RadiusX="0.8" RadiusY="0.8">
-                                                <GradientStop Color="#FFFFFF" Offset="0.0" />
-                                                <GradientStop Color="#F0ECE1" Offset="0.4" />
-                                                <GradientStop Color="#C5BFAC" Offset="1.0" />
-                                            </RadialGradientBrush>
-                                        </Border.Background>
-                                        <Path Data="M 0,7 L 8,0 L 8,4 L 16,4 L 16,10 L 8,10 L 8,14 Z" Stroke="#0A369D" StrokeThickness="1.4" Fill="Transparent" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
+                        <Ellipse Canvas.Left="60" Canvas.Top="240" Width="140" Height="140" Fill="#28303E" Stroke="#1E242E" StrokeThickness="3"/>
 
-                        <!-- Стрелка ВВЕРХ (Верхний сектор розетки: X=60, Y=65, W=66, H=28) -->
-                        <Button Canvas.Left="60" Canvas.Top="65" Width="66" Height="28" Click="OnNavUpClicked">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border BorderBrush="#0A369D" BorderThickness="1.5" CornerRadius="14,14,4,4">
-                                        <Border.Background>
-                                            <RadialGradientBrush Center="0.4,0.2" RadiusX="0.8" RadiusY="0.8">
-                                                <GradientStop Color="#FFFFFF" Offset="0.0" />
-                                                <GradientStop Color="#F0ECE1" Offset="0.4" />
-                                                <GradientStop Color="#C5BFAC" Offset="1.0" />
-                                            </RadialGradientBrush>
-                                        </Border.Background>
-                                        <Path Data="M 7,0 L 14,8 L 10,8 L 10,16 L 4,16 L 4,8 L 0,8 Z" Stroke="#0A369D" StrokeThickness="1.4" Fill="Transparent" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
+                        <Ellipse Canvas.Left="78" Canvas.Top="262" Width="26" Height="26" Fill="#78350F" Stroke="#1E242E" StrokeThickness="2"/>
+                        <Ellipse Canvas.Left="156" Canvas.Top="262" Width="26" Height="26" Fill="#78350F" Stroke="#1E242E" StrokeThickness="2"/>
+                        <Ellipse Canvas.Left="117" Canvas.Top="328" Width="26" Height="26" Fill="#78350F" Stroke="#1E242E" StrokeThickness="2"/>
 
-                        <!-- Стрелка ВНИЗ (Нижний сектор розетки: X=60, Y=97, W=66, H=28) -->
-                        <Button Canvas.Left="60" Canvas.Top="97" Width="66" Height="28" Click="OnNavDownClicked">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border BorderBrush="#0A369D" BorderThickness="1.5" CornerRadius="4,4,14,14">
-                                        <Border.Background>
-                                            <RadialGradientBrush Center="0.4,0.2" RadiusX="0.8" RadiusY="0.8">
-                                                <GradientStop Color="#FFFFFF" Offset="0.0" />
-                                                <GradientStop Color="#F0ECE1" Offset="0.4" />
-                                                <GradientStop Color="#C5BFAC" Offset="1.0" />
-                                            </RadialGradientBrush>
-                                        </Border.Background>
-                                        <Path Data="M 4,0 L 10,0 L 10,8 L 14,8 L 7,16 L 0,8 L 4,8 Z" Stroke="#0A369D" StrokeThickness="1.4" Fill="Transparent" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
+                        <Ellipse Canvas.Left="110" Canvas.Top="290" Width="40" Height="40" Fill="#0F172A" Stroke="#64748B" StrokeThickness="2"/>
+                        <Ellipse Canvas.Left="122" Canvas.Top="302" Width="16" Height="16" Fill="#94A3B8"/>
 
-                        <!-- Стрелка ВПРАВО (Правое крыло розетки: X=130, Y=68, W=42, H=54) -->
-                        <Button Canvas.Left="130" Canvas.Top="68" Width="42" Height="54" Click="OnCursorRightClicked">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border BorderBrush="#0A369D" BorderThickness="1.5" CornerRadius="4,24,24,4">
-                                        <Border.Background>
-                                            <RadialGradientBrush Center="0.3,0.3" RadiusX="0.8" RadiusY="0.8">
-                                                <GradientStop Color="#FFFFFF" Offset="0.0" />
-                                                <GradientStop Color="#F0ECE1" Offset="0.4" />
-                                                <GradientStop Color="#C5BFAC" Offset="1.0" />
-                                            </RadialGradientBrush>
-                                        </Border.Background>
-                                        <Path Data="M 0,4 L 8,4 L 8,0 L 16,7 L 8,14 L 8,10 L 0,10 Z" Stroke="#0A369D" StrokeThickness="1.4" Fill="Transparent" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
-
-
-                        <!-- ================= РЯД 3: КУРСОР | УКОРОЧЕНИЕ | ОК/МЕНЮ (Y=134..166) ================= -->
-
-                        <!-- Кнопка КУРСОР -->
-                        <Button Canvas.Left="10" Canvas.Top="134" Width="46" Height="32" Style="{StaticResource BubbleKey}" Click="OnCursorToggleClicked">
-                            <TextBlock Text="КУРСОР" FontSize="7.5" FontWeight="Bold" Foreground="#0A369D" />
-                        </Button>
-
-                        <!-- Блок УКОРОЧЕНИЕ -->
-                        <Border Canvas.Left="60" Canvas.Top="134" Width="66" Height="32" BorderBrush="#0A369D" BorderThickness="1.5" CornerRadius="6" Background="#ECE8DE">
-                            <Grid>
-                                <TextBlock Text="УКОРОЧЕНИЕ" FontSize="6.2" FontWeight="Bold" Foreground="#0A369D" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,2,0,0"/>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,2">
-                                    <Button Width="27" Height="17" Style="{StaticResource SubBubbleKey}" Click="OnShorteningMinusClicked" Margin="0,0,2,0">
-                                        <Path Data="M 6,0 L 0,4 L 6,8 Z" Stroke="#0A369D" StrokeThickness="1.3" Fill="Transparent"/>
-                                    </Button>
-                                    <Button Width="27" Height="17" Style="{StaticResource SubBubbleKey}" Click="OnShorteningPlusClicked" Margin="2,0,0,0">
-                                        <Path Data="M 0,0 L 6,4 L 0,8 Z" Stroke="#0A369D" StrokeThickness="1.3" Fill="Transparent"/>
-                                    </Button>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-
-                        <!-- Кнопка ОК / МЕНЮ -->
-                        <Button Canvas.Left="130" Canvas.Top="134" Width="46" Height="32" Style="{StaticResource BubbleKey}" Click="OnModeClicked">
-                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <TextBlock Text="OK" FontSize="7.5" FontWeight="Bold" Foreground="#0A369D" HorizontalAlignment="Center"/>
-                                <Line X1="0" Y1="0" X2="24" Y2="0" Stroke="#0A369D" StrokeThickness="1" Margin="0,1,0,1"/>
-                                <TextBlock Text="МЕНЮ" FontSize="6.5" FontWeight="Bold" Foreground="#0A369D" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
-
-
-                        <!-- ================= РЯД 4: ТУРБО | ИМПУЛЬС | ПАМЯТЬ (Y=172..204) ================= -->
-
-                        <!-- Кнопка ТУРБО -->
-                        <Button Canvas.Left="10" Canvas.Top="172" Width="46" Height="32" Style="{StaticResource BubbleKey}" Click="OnTurboClicked">
-                            <TextBlock Text="ТУРБО" FontSize="7.5" FontWeight="Bold" Foreground="#0A369D" />
-                        </Button>
-
-                        <!-- Блок ИМПУЛЬС -->
-                        <Border Canvas.Left="60" Canvas.Top="172" Width="66" Height="32" BorderBrush="#0A369D" BorderThickness="1.5" CornerRadius="6" Background="#ECE8DE">
-                            <Grid>
-                                <TextBlock Text="ИМПУЛЬС" FontSize="6.5" FontWeight="Bold" Foreground="#0A369D" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,2,0,0"/>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,2">
-                                    <Button Width="27" Height="17" Style="{StaticResource SubBubbleKey}" Click="OnPulseMinusClicked" Margin="0,0,2,0">
-                                        <Path Data="M 6,0 L 0,4 L 6,8 Z" Stroke="#0A369D" StrokeThickness="1.3" Fill="Transparent"/>
-                                    </Button>
-                                    <Button Width="27" Height="17" Style="{StaticResource SubBubbleKey}" Click="OnPulsePlusClicked" Margin="2,0,0,0">
-                                        <Path Data="M 0,0 L 6,4 L 0,8 Z" Stroke="#0A369D" StrokeThickness="1.3" Fill="Transparent"/>
-                                    </Button>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-
-                        <!-- Кнопка ПАМЯТЬ -->
-                        <Button Canvas.Left="130" Canvas.Top="172" Width="46" Height="32" Style="{StaticResource BubbleKey}" Click="OnMemoryClicked">
-                            <TextBlock Text="ПАМЯТЬ" FontSize="7" FontWeight="Bold" Foreground="#0A369D" />
-                        </Button>
-
-
-                        <!-- ================= РЯД 5: ПОДСВЕТКА | КОМПЕНСАЦИЯ | ПИТАНИЕ (Y=210..242) ================= -->
-
-                        <!-- Кнопка ПОДСВЕТКА (☀) -->
-                        <Button Canvas.Left="10" Canvas.Top="210" Width="46" Height="32" Style="{StaticResource BubbleKey}" Click="OnBacklightClicked">
-                            <Grid Width="16" Height="16">
-                                <Ellipse Width="7" Height="7" Stroke="#0A369D" StrokeThickness="1.3"/>
-                                <Path Data="M 8,0 L 8,2 M 8,14 L 8,16 M 0,8 L 2,8 M 14,8 L 16,8 M 2.5,2.5 L 4,4 M 12,12 L 13.5,13.5 M 2.5,13.5 L 4,12 M 12,4 L 13.5,2.5" 
-                                      Stroke="#0A369D" StrokeThickness="1.3"/>
-                            </Grid>
-                        </Button>
-
-                        <!-- Блок КОМПЕНСАЦИЯ -->
-                        <Border Canvas.Left="60" Canvas.Top="210" Width="66" Height="32" BorderBrush="#0A369D" BorderThickness="1.5" CornerRadius="6" Background="#ECE8DE">
-                            <Grid>
-                                <TextBlock Text="КОМПЕНСАЦИЯ" FontSize="5.2" FontWeight="Bold" Foreground="#0A369D" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,2,0,0"/>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,2">
-                                    <Button Width="27" Height="17" Style="{StaticResource SubBubbleKey}" Click="OnCompensationMinusClicked" Margin="0,0,2,0">
-                                        <Path Data="M 6,0 L 0,4 L 6,8 Z" Stroke="#0A369D" StrokeThickness="1.3" Fill="Transparent"/>
-                                    </Button>
-                                    <Button Width="27" Height="17" Style="{StaticResource SubBubbleKey}" Click="OnCompensationPlusClicked" Margin="2,0,0,0">
-                                        <Path Data="M 0,0 L 6,4 L 0,8 Z" Stroke="#0A369D" StrokeThickness="1.3" Fill="Transparent"/>
-                                    </Button>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-
-                        <!-- Кнопка ПИТАНИЕ (⏻) -->
-                        <Button Canvas.Left="130" Canvas.Top="210" Width="46" Height="32" Style="{StaticResource BubbleKey}" Click="OnPowerButtonClicked">
-                            <Grid Width="16" Height="16">
-                                <Path Data="M 4,6 A 5.5,5.5 0 1 0 12,6" Stroke="#0A369D" StrokeThickness="1.5" Fill="Transparent" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                <Line X1="8" Y1="1" X2="8" Y2="7" Stroke="#0A369D" StrokeThickness="1.5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Grid>
-                        </Button>
-
-
-                        <!-- ================= ЗАВОДСКАЯ МАРКИРОВКА ВНИЗУ (Y=248..345) ================= -->
-
-                        <TextBlock Canvas.Left="0" Canvas.Top="252" Width="186" TextAlignment="Center" Text="РЕЙС-105М1" FontWeight="Bold" FontSize="13" Foreground="#0A369D" />
-                        <TextBlock Canvas.Left="0" Canvas.Top="270" Width="186" TextAlignment="Center" Text="РЕФЛЕКТОМЕТР&#x0a;ПОРТАТИВНЫЙ ЦИФРОВОЙ" FontWeight="SemiBold" FontSize="7.5" Foreground="#0A369D" LineHeight="9" />
-                        
-                        <StackPanel Canvas.Left="0" Canvas.Top="298" Width="186" Orientation="Horizontal" HorizontalAlignment="Center">
-                            <!-- Фирменный значок осциллограммы в круге -->
-                            <Border Width="16" Height="14" BorderBrush="#0A369D" BorderThickness="1.4" CornerRadius="3" Margin="0,0,5,0">
-                                <TextBlock Text="∿" FontSize="9" FontWeight="Bold" Foreground="#0A369D" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <TextBlock Text="STÉLL®" FontWeight="ExtraBold" FontSize="12" Foreground="#0A369D" VerticalAlignment="Center"/>
-                        </StackPanel>
-
+                        <Line X1="130" Y1="310" X2="165" Y2="330" Stroke="#475569" StrokeThickness="6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                        <Ellipse Canvas.Left="160" Canvas.Top="325" Width="12" Height="12" Fill="#E2E8F0" Stroke="#334155" StrokeThickness="1.5"/>
                     </Canvas>
-                </Border>
-            </Canvas>
-        </Canvas>
+
+                    <Path Stroke="#111827" StrokeThickness="16" Opacity="0.25" Canvas.Left="0" Canvas.Top="10">
+                        <Path.Data>
+                            <PathGeometry>
+                                <PathFigure x:Name="CableShadowFigure" StartPoint="122, 364">
+                                    <BezierSegment x:Name="CableShadowBezier" Point1="268, 258" Point2="557, -20" Point3="557, 46" />
+                                </PathFigure>
+                            </PathGeometry>
+                        </Path.Data>
+                    </Path>
+
+                    <Path Stroke="#B45309" StrokeThickness="14" Canvas.Left="0" Canvas.Top="0">
+                        <Path.Data>
+                            <PathGeometry>
+                                <PathFigure x:Name="CableBorderFigure" StartPoint="170, 502">
+                                    <ArcSegment Point="122, 354" Size="82,82" SweepDirection="Clockwise" IsLargeArc="False"/>
+                                    <BezierSegment x:Name="CableBorderBezier" Point1="268, 248" Point2="557, -30" Point3="557, 36" />
+                                </PathFigure>
+                            </PathGeometry>
+                        </Path.Data>
+                    </Path>
+
+                    <Path Stroke="#F59E0B" StrokeThickness="10" Canvas.Left="0" Canvas.Top="0">
+                        <Path.Data>
+                            <PathGeometry>
+                                <PathFigure x:Name="CableFigure" StartPoint="170, 502">
+                                    <ArcSegment Point="122, 354" Size="82,82" SweepDirection="Clockwise" IsLargeArc="False"/>
+                                    <BezierSegment x:Name="CableBezier" Point1="268, 248" Point2="557, -30" Point3="557, 36" />
+                                </PathFigure>
+                            </PathGeometry>
+                        </Path.Data>
+                    </Path>
+
+                    <Canvas x:Name="CablePlug" Canvas.Left="541" Canvas.Top="36" Width="32" Height="70" Panel.ZIndex="10">
+                        <Path Fill="#1F2937">
+                            <Path.Data>
+                                <PathGeometry>
+                                    <PathFigure StartPoint="8,0" IsClosed="True">
+                                        <LineSegment Point="24,0"/>
+                                        <LineSegment Point="28,16"/>
+                                        <LineSegment Point="4,16"/>
+                                    </PathFigure>
+                                </PathGeometry>
+                            </Path.Data>
+                        </Path>
+                        <Rectangle Canvas.Left="10" Canvas.Top="3" Width="12" Height="3" Fill="#374151"/>
+                        <Rectangle Canvas.Left="8" Canvas.Top="8" Width="16" Height="3" Fill="#374151"/>
+
+                        <Rectangle Canvas.Top="16" Width="32" Height="36" Fill="#E2E8F0" RadiusX="3" RadiusY="3" Stroke="#475569" StrokeThickness="1.5" />
+                        <Rectangle Canvas.Top="22" Width="32" Height="3" Fill="#94A3B8"/>
+                        <Rectangle Canvas.Top="30" Width="32" Height="3" Fill="#94A3B8"/>
+                        <Rectangle Canvas.Top="38" Width="32" Height="3" Fill="#94A3B8"/>
+                        <Rectangle Canvas.Top="46" Width="32" Height="3" Fill="#94A3B8"/>
+
+                        <Rectangle Canvas.Left="8" Canvas.Top="52" Width="16" Height="18" Fill="#FBBF24" Stroke="#B45309" StrokeThickness="1" RadiusX="2" RadiusY="2" />
+                        <Ellipse Canvas.Left="13" Canvas.Top="60" Width="6" Height="6" Fill="#1E293B"/>
+                    </Canvas>
+
+                    <Canvas x:Name="DeviceBody" Canvas.Left="470" Canvas.Top="130" Width="280" Height="620">
+                        <Rectangle Canvas.Left="75" Canvas.Top="-18" Width="24" Height="22" Fill="#B8BDC2" Stroke="#4A4E53" StrokeThickness="1.5" RadiusX="2" RadiusY="2" />
+                        <Rectangle Canvas.Left="80" Canvas.Top="-24" Width="14" Height="8" Fill="#8C9196" Stroke="#333" RadiusX="1" RadiusY="1" />
+                        <TextBlock Canvas.Left="64" Canvas.Top="-38" Text="ВХОД 1" FontWeight="Bold" FontSize="10" Foreground="#F3F4F6"/>
+
+                        <Rectangle Canvas.Left="127" Canvas.Top="-24" Width="26" Height="28" Fill="#1E1E20" Stroke="#111" StrokeThickness="2" RadiusX="4" RadiusY="4" />
+                        <Line X1="140" Y1="-24" X2="140" Y2="-12" Stroke="#EEEEEE" StrokeThickness="2" />
+
+                        <Rectangle Canvas.Left="181" Canvas.Top="-18" Width="24" Height="22" Fill="#B8BDC2" Stroke="#4A4E53" StrokeThickness="1.5" RadiusX="2" RadiusY="2" />
+                        <Rectangle Canvas.Left="186" Canvas.Top="-24" Width="14" Height="8" Fill="#8C9196" Stroke="#333" RadiusX="1" RadiusY="1" />
+                        <TextBlock Canvas.Left="170" Canvas.Top="-38" Text="ВХОД 2" FontWeight="Bold" FontSize="10" Foreground="#F3F4F6"/>
+
+                        <Canvas Canvas.Left="106" Canvas.Top="585">
+                            <Border Width="16" Height="8" Background="#B0B5BA" BorderBrush="#4A4E53" BorderThickness="1" CornerRadius="1.5" />
+                            <Ellipse Canvas.Left="4" Canvas.Top="1.5" Width="8" Height="5" Fill="#1C1E20" Stroke="#444" StrokeThickness="0.6" />
+                            <Ellipse Canvas.Left="7" Canvas.Top="3" Width="2" Height="2" Fill="#D0A33B" />
+                        </Canvas>
+
+                        <Canvas Canvas.Left="138" Canvas.Top="585">
+                            <Rectangle Canvas.Left="0" Canvas.Top="0" Width="44" Height="3.5" Fill="#B8BDC2" Stroke="#5A5F64" StrokeThickness="0.8" RadiusX="1" RadiusY="1"/>
+                            <Border Canvas.Left="2" Canvas.Top="2.5" Width="5.5" Height="8.5" Background="#C8CDD2" BorderBrush="#555A60" BorderThickness="0.8" CornerRadius="1">
+                                <Ellipse Width="2.5" Height="2.5" Fill="#2A2C2E" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Path Canvas.Left="9.5" Canvas.Top="2.5" Fill="#CCD1D6" Stroke="#4B5055" StrokeThickness="0.9">
+                                <Path.Data>
+                                    <PathGeometry>
+                                        <PathFigure StartPoint="0,0" IsClosed="True">
+                                            <LineSegment Point="25,0" />
+                                            <LineSegment Point="22,9" />
+                                            <LineSegment Point="3,9" />
+                                        </PathFigure>
+                                    </PathGeometry>
+                                </Path.Data>
+                            </Path>
+                            <Path Canvas.Left="11.5" Canvas.Top="3.5" Fill="#1A1C1E">
+                                <Path.Data>
+                                    <PathGeometry>
+                                        <PathFigure StartPoint="0,0" IsClosed="True">
+                                            <LineSegment Point="21,0" />
+                                            <LineSegment Point="18.5,7" />
+                                            <LineSegment Point="2.5,7" />
+                                        </PathFigure>
+                                    </PathGeometry>
+                                </Path.Data>
+                            </Path>
+                            <Canvas Canvas.Left="13.5" Canvas.Top="4.5">
+                                <Ellipse Canvas.Left="0" Canvas.Top="0" Width="1.5" Height="1.5" Fill="#E5C158"/>
+                                <Ellipse Canvas.Left="3.5" Canvas.Top="0" Width="1.5" Height="1.5" Fill="#E5C158"/>
+                                <Ellipse Canvas.Left="7" Canvas.Top="0" Width="1.5" Height="1.5" Fill="#E5C158"/>
+                                <Ellipse Canvas.Left="10.5" Canvas.Top="0" Width="1.5" Height="1.5" Fill="#E5C158"/>
+                                <Ellipse Canvas.Left="14" Canvas.Top="0" Width="1.5" Height="1.5" Fill="#E5C158"/>
+                                <Ellipse Canvas.Left="1.8" Canvas.Top="2.5" Width="1.5" Height="1.5" Fill="#E5C158"/>
+                                <Ellipse Canvas.Left="5.3" Canvas.Top="2.5" Width="1.5" Height="1.5" Fill="#E5C158"/>
+                                <Ellipse Canvas.Left="8.8" Canvas.Top="2.5" Width="1.5" Height="1.5" Fill="#E5C158"/>
+                                <Ellipse Canvas.Left="12.3" Canvas.Top="2.5" Width="1.5" Height="1.5" Fill="#E5C158"/>
+                            </Canvas>
+                            <Border Canvas.Left="36.5" Canvas.Top="2.5" Width="5.5" Height="8.5" Background="#C8CDD2" BorderBrush="#555A60" BorderThickness="0.8" CornerRadius="1">
+                                <Ellipse Width="2.5" Height="2.5" Fill="#2A2C2E" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Canvas>
+
+                        <Path Fill="#DAD6C9" Stroke="#8A8679" StrokeThickness="2">
+                            <Path.Effect>
+                                <DropShadowEffect BlurRadius="25" ShadowDepth="12" Direction="315" Color="#000000" Opacity="0.55"/>
+                            </Path.Effect>
+                            <Path.Data>
+                                <PathGeometry>
+                                    <PathFigure StartPoint="15,0" IsClosed="True">
+                                        <LineSegment Point="265,0" />
+                                        <ArcSegment Point="275,10" Size="10,10" SweepDirection="Clockwise" />
+                                        <LineSegment Point="275,160" />
+                                        <LineSegment Point="236,215" />
+                                        <LineSegment Point="236,575" />
+                                        <ArcSegment Point="226,585" Size="10,10" SweepDirection="Clockwise" />
+                                        <LineSegment Point="54,585" />
+                                        <ArcSegment Point="44,575" Size="10,10" SweepDirection="Clockwise" />
+                                        <LineSegment Point="44,215" />
+                                        <LineSegment Point="5,160" />
+                                        <LineSegment Point="5,10" />
+                                        <ArcSegment Point="15,0" Size="10,10" SweepDirection="Clockwise" />
+                                    </PathFigure>
+                                </PathGeometry>
+                            </Path.Data>
+                        </Path>
+
+                        <Border Canvas.Left="36" Canvas.Top="42" Width="208" Height="114" Background="#3A3D38" CornerRadius="4" Padding="6">
+                            <Border Background="#8F9F58" CornerRadius="2" BorderBrush="#252822" BorderThickness="1.5">
+                                <Image x:Name="LcdImage" Stretch="Fill" RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                            </Border>
+                        </Border>
+
+                        <Border Canvas.Left="47" Canvas.Top="216" Width="186" Height="356"
+                                Background="#EDE9DE" BorderBrush="#0A369D" BorderThickness="2" CornerRadius="10">
+                            <Canvas>
+                                <Border Canvas.Left="10" Canvas.Top="10" Width="46" Height="48" BorderBrush="#0A369D" BorderThickness="1.5" CornerRadius="6" Background="#ECE8DE">
+                                    <StackPanel VerticalAlignment="Center">
+                                        <Button Height="17" Width="40" Style="{StaticResource InspectorSubKey}" Tag="GAIN_PLUS" Click="OnKeyInspectClicked">
+                                            <Path Data="M 0,7 L 5,0 L 10,7 Z" Stroke="#0A369D" StrokeThickness="1.3" Fill="Transparent"/>
+                                        </Button>
+                                        <TextBlock Text="УСИЛЕНИЕ" FontSize="6" FontWeight="Bold" Foreground="#0A369D" HorizontalAlignment="Center" Margin="0,1,0,1"/>
+                                        <Button Height="17" Width="40" Style="{StaticResource InspectorSubKey}" Tag="GAIN_MINUS" Click="OnKeyInspectClicked">
+                                            <Path Data="M 0,0 L 5,7 L 10,0 Z" Stroke="#0A369D" StrokeThickness="1.3" Fill="Transparent"/>
+                                        </Button>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Canvas.Left="60" Canvas.Top="10" Width="66" Height="48" BorderBrush="#0A369D" BorderThickness="1.5" CornerRadius="6" Background="#ECE8DE">
+                                    <Grid>
+                                        <TextBlock Text="ДИАПАЗОН" FontSize="6.5" FontWeight="Bold" Foreground="#0A369D" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,4,0,0"/>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,4">
+                                            <Button Width="27" Height="25" Style="{StaticResource InspectorSubKey}" Tag="RANGE_MINUS" Click="OnKeyInspectClicked" Margin="0,0,2,0">
+                                                <Path Data="M 7,0 L 0,5 L 7,10 Z" Stroke="#0A369D" StrokeThickness="1.3" Fill="Transparent"/>
+                                            </Button>
+                                            <Button Width="27" Height="25" Style="{StaticResource InspectorSubKey}" Tag="RANGE_PLUS" Click="OnKeyInspectClicked" Margin="2,0,0,0">
+                                                <Path Data="M 0,0 L 7,5 L 0,10 Z" Stroke="#0A369D" StrokeThickness="1.3" Fill="Transparent"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <Border Canvas.Left="130" Canvas.Top="10" Width="46" Height="48" BorderBrush="#0A369D" BorderThickness="1.5" CornerRadius="6" Background="#ECE8DE">
+                                    <StackPanel VerticalAlignment="Center">
+                                        <Button Height="17" Width="40" Style="{StaticResource InspectorSubKey}" Tag="ZOOM_PLUS" Click="OnKeyInspectClicked">
+                                            <Path Data="M 0,7 L 5,0 L 10,7 Z" Stroke="#0A369D" StrokeThickness="1.3" Fill="Transparent"/>
+                                        </Button>
+                                        <TextBlock Text="РАСТЯЖКА" FontSize="6" FontWeight="Bold" Foreground="#0A369D" HorizontalAlignment="Center" Margin="0,1,0,1"/>
+                                        <Button Height="17" Width="40" Style="{StaticResource InspectorSubKey}" Tag="ZOOM_MINUS" Click="OnKeyInspectClicked">
+                                            <Path Data="M 0,0 L 5,7 L 10,0 Z" Stroke="#0A369D" StrokeThickness="1.3" Fill="Transparent"/>
+                                        </Button>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Canvas.Left="10" Canvas.Top="62" Width="166" Height="66" CornerRadius="33" BorderBrush="#0A369D" BorderThickness="1.5" Background="#E6E2D4" />
+
+                                <Button Canvas.Left="14" Canvas.Top="68" Width="42" Height="54" Cursor="Hand" Tag="CURSOR_LEFT" Click="OnKeyInspectClicked">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="btnBorder" BorderBrush="#0A369D" BorderThickness="1.5" CornerRadius="24,4,4,24">
+                                                <Border.Background>
+                                                    <RadialGradientBrush Center="0.3,0.3" RadiusX="0.8" RadiusY="0.8">
+                                                        <GradientStop Color="#FFFFFF" Offset="0.0" />
+                                                        <GradientStop Color="#F0ECE1" Offset="0.4" />
+                                                        <GradientStop Color="#C5BFAC" Offset="1.0" />
+                                                    </RadialGradientBrush>
+                                                </Border.Background>
+                                                <Path x:Name="arrowPath" Data="M 0,7 L 8,0 L 8,4 L 16,4 L 16,10 L 8,10 L 8,14 Z" Stroke="#0A369D" StrokeThickness="1.4" Fill="Transparent" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="btnBorder" Property="BorderBrush" Value="#0284C7" />
+                                                    <Setter TargetName="btnBorder" Property="Background" Value="#F8FAFC" />
+                                                    <Setter TargetName="arrowPath" Property="Stroke" Value="#0284C7" />
+                                                </Trigger>
+                                                <Trigger Property="IsPressed" Value="True">
+                                                    <Setter TargetName="btnBorder" Property="Background" Value="#BCB6A2" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+
+                                <Button Canvas.Left="60" Canvas.Top="65" Width="66" Height="28" Cursor="Hand" Tag="NAV_UP" Click="OnKeyInspectClicked">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="btnBorder" BorderBrush="#0A369D" BorderThickness="1.5" CornerRadius="14,14,4,4">
+                                                <Border.Background>
+                                                    <RadialGradientBrush Center="0.4,0.2" RadiusX="0.8" RadiusY="0.8">
+                                                        <GradientStop Color="#FFFFFF" Offset="0.0" />
+                                                        <GradientStop Color="#F0ECE1" Offset="0.4" />
+                                                        <GradientStop Color="#C5BFAC" Offset="1.0" />
+                                                    </RadialGradientBrush>
+                                                </Border.Background>
+                                                <Path x:Name="arrowPath" Data="M 7,0 L 14,8 L 10,8 L 10,16 L 4,16 L 4,8 L 0,8 Z" Stroke="#0A369D" StrokeThickness="1.4" Fill="Transparent" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="btnBorder" Property="BorderBrush" Value="#0284C7" />
+                                                    <Setter TargetName="btnBorder" Property="Background" Value="#F8FAFC" />
+                                                    <Setter TargetName="arrowPath" Property="Stroke" Value="#0284C7" />
+                                                </Trigger>
+                                                <Trigger Property="IsPressed" Value="True">
+                                                    <Setter TargetName="btnBorder" Property="Background" Value="#BCB6A2" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+
+                                <Button Canvas.Left="60" Canvas.Top="97" Width="66" Height="28" Cursor="Hand" Tag="NAV_DOWN" Click="OnKeyInspectClicked">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="btnBorder" BorderBrush="#0A369D" BorderThickness="1.5" CornerRadius="4,4,14,14">
+                                                <Border.Background>
+                                                    <RadialGradientBrush Center="0.4,0.2" RadiusX="0.8" RadiusY="0.8">
+                                                        <GradientStop Color="#FFFFFF" Offset="0.0" />
+                                                        <GradientStop Color="#F0ECE1" Offset="0.4" />
+                                                        <GradientStop Color="#C5BFAC" Offset="1.0" />
+                                                    </RadialGradientBrush>
+                                                </Border.Background>
+                                                <Path x:Name="arrowPath" Data="M 4,0 L 10,0 L 10,8 L 14,8 L 7,16 L 0,8 L 4,8 Z" Stroke="#0A369D" StrokeThickness="1.4" Fill="Transparent" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="btnBorder" Property="BorderBrush" Value="#0284C7" />
+                                                    <Setter TargetName="btnBorder" Property="Background" Value="#F8FAFC" />
+                                                    <Setter TargetName="arrowPath" Property="Stroke" Value="#0284C7" />
+                                                </Trigger>
+                                                <Trigger Property="IsPressed" Value="True">
+                                                    <Setter TargetName="btnBorder" Property="Background" Value="#BCB6A2" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+
+                                <Button Canvas.Left="130" Canvas.Top="68" Width="42" Height="54" Cursor="Hand" Tag="CURSOR_RIGHT" Click="OnKeyInspectClicked">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="btnBorder" BorderBrush="#0A369D" BorderThickness="1.5" CornerRadius="4,24,24,4">
+                                                <Border.Background>
+                                                    <RadialGradientBrush Center="0.3,0.3" RadiusX="0.8" RadiusY="0.8">
+                                                        <GradientStop Color="#FFFFFF" Offset="0.0" />
+                                                        <GradientStop Color="#F0ECE1" Offset="0.4" />
+                                                        <GradientStop Color="#C5BFAC" Offset="1.0" />
+                                                    </RadialGradientBrush>
+                                                </Border.Background>
+                                                <Path x:Name="arrowPath" Data="M 0,4 L 8,4 L 8,0 L 16,7 L 8,14 L 8,10 L 0,10 Z" Stroke="#0A369D" StrokeThickness="1.4" Fill="Transparent" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="btnBorder" Property="BorderBrush" Value="#0284C7" />
+                                                    <Setter TargetName="btnBorder" Property="Background" Value="#F8FAFC" />
+                                                    <Setter TargetName="arrowPath" Property="Stroke" Value="#0284C7" />
+                                                </Trigger>
+                                                <Trigger Property="IsPressed" Value="True">
+                                                    <Setter TargetName="btnBorder" Property="Background" Value="#BCB6A2" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+
+                                <Button Canvas.Left="10" Canvas.Top="134" Width="46" Height="32" Style="{StaticResource InspectorKey}" Tag="CURSOR_TOGGLE" Click="OnKeyInspectClicked">
+                                    <TextBlock Text="КУРСОР" FontSize="7.5" FontWeight="Bold" Foreground="#0A369D" />
+                                </Button>
+
+                                <Border Canvas.Left="60" Canvas.Top="134" Width="66" Height="32" BorderBrush="#0A369D" BorderThickness="1.5" CornerRadius="6" Background="#ECE8DE">
+                                    <Grid>
+                                        <TextBlock Text="УКОРОЧЕНИЕ" FontSize="6.2" FontWeight="Bold" Foreground="#0A369D" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,2,0,0"/>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,2">
+                                            <Button Width="27" Height="17" Style="{StaticResource InspectorSubKey}" Tag="SHORTENING_MINUS" Click="OnKeyInspectClicked" Margin="0,0,2,0">
+                                                <Path Data="M 6,0 L 0,4 L 6,8 Z" Stroke="#0A369D" StrokeThickness="1.3" Fill="Transparent"/>
+                                            </Button>
+                                            <Button Width="27" Height="17" Style="{StaticResource InspectorSubKey}" Tag="SHORTENING_PLUS" Click="OnKeyInspectClicked" Margin="2,0,0,0">
+                                                <Path Data="M 0,0 L 6,4 L 0,8 Z" Stroke="#0A369D" StrokeThickness="1.3" Fill="Transparent"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <Button Canvas.Left="130" Canvas.Top="134" Width="46" Height="32" Style="{StaticResource InspectorKey}" Tag="MENU_OK" Click="OnKeyInspectClicked">
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock Text="OK" FontSize="7.5" FontWeight="Bold" Foreground="#0A369D" HorizontalAlignment="Center"/>
+                                        <Line X1="0" Y1="0" X2="24" Y2="0" Stroke="#0A369D" StrokeThickness="1" Margin="0,1,0,1"/>
+                                        <TextBlock Text="МЕНЮ" FontSize="6.5" FontWeight="Bold" Foreground="#0A369D" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <Button Canvas.Left="10" Canvas.Top="172" Width="46" Height="32" Style="{StaticResource InspectorKey}" Tag="TURBO" Click="OnKeyInspectClicked">
+                                    <TextBlock Text="ТУРБО" FontSize="7.5" FontWeight="Bold" Foreground="#0A369D" />
+                                </Button>
+
+                                <Border Canvas.Left="60" Canvas.Top="172" Width="66" Height="32" BorderBrush="#0A369D" BorderThickness="1.5" CornerRadius="6" Background="#ECE8DE">
+                                    <Grid>
+                                        <TextBlock Text="ИМПУЛЬС" FontSize="6.5" FontWeight="Bold" Foreground="#0A369D" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,2,0,0"/>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,2">
+                                            <Button Width="27" Height="17" Style="{StaticResource InspectorSubKey}" Tag="PULSE_MINUS" Click="OnKeyInspectClicked" Margin="0,0,2,0">
+                                                <Path Data="M 6,0 L 0,4 L 6,8 Z" Stroke="#0A369D" StrokeThickness="1.3" Fill="Transparent"/>
+                                            </Button>
+                                            <Button Width="27" Height="17" Style="{StaticResource InspectorSubKey}" Tag="PULSE_PLUS" Click="OnKeyInspectClicked" Margin="2,0,0,0">
+                                                <Path Data="M 0,0 L 6,4 L 0,8 Z" Stroke="#0A369D" StrokeThickness="1.3" Fill="Transparent"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <Button Canvas.Left="130" Canvas.Top="172" Width="46" Height="32" Style="{StaticResource InspectorKey}" Tag="MEMORY" Click="OnKeyInspectClicked">
+                                    <TextBlock Text="ПАМЯТЬ" FontSize="7" FontWeight="Bold" Foreground="#0A369D" />
+                                </Button>
+
+                                <Button Canvas.Left="10" Canvas.Top="210" Width="46" Height="32" Style="{StaticResource InspectorKey}" Tag="BACKLIGHT" Click="OnKeyInspectClicked">
+                                    <Grid Width="16" Height="16">
+                                        <Ellipse Width="7" Height="7" Stroke="#0A369D" StrokeThickness="1.3"/>
+                                        <Path Data="M 8,0 L 8,2 M 8,14 L 8,16 M 0,8 L 2,8 M 14,8 L 16,8 M 2.5,2.5 L 4,4 M 12,12 L 13.5,13.5 M 2.5,13.5 L 4,12 M 12,4 L 13.5,2.5" 
+                                              Stroke="#0A369D" StrokeThickness="1.3"/>
+                                    </Grid>
+                                </Button>
+
+                                <Border Canvas.Left="60" Canvas.Top="210" Width="66" Height="32" BorderBrush="#0A369D" BorderThickness="1.5" CornerRadius="6" Background="#ECE8DE">
+                                    <Grid>
+                                        <TextBlock Text="КОМПЕНСАЦИЯ" FontSize="5.2" FontWeight="Bold" Foreground="#0A369D" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,2,0,0"/>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,2">
+                                            <Button Width="27" Height="17" Style="{StaticResource InspectorSubKey}" Tag="COMP_MINUS" Click="OnKeyInspectClicked" Margin="0,0,2,0">
+                                                <Path Data="M 6,0 L 0,4 L 6,8 Z" Stroke="#0A369D" StrokeThickness="1.3" Fill="Transparent"/>
+                                            </Button>
+                                            <Button Width="27" Height="17" Style="{StaticResource InspectorSubKey}" Tag="COMP_PLUS" Click="OnKeyInspectClicked" Margin="2,0,0,0">
+                                                <Path Data="M 0,0 L 6,4 L 0,8 Z" Stroke="#0A369D" StrokeThickness="1.3" Fill="Transparent"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <Button Canvas.Left="130" Canvas.Top="210" Width="46" Height="32" Style="{StaticResource InspectorKey}" Tag="POWER" Click="OnKeyInspectClicked">
+                                    <Grid Width="16" Height="16">
+                                        <Path Data="M 4,6 A 5.5,5.5 0 1 0 12,6" Stroke="#0A369D" StrokeThickness="1.5" Fill="Transparent" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        <Line X1="8" Y1="1" X2="8" Y2="7" Stroke="#0A369D" StrokeThickness="1.5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Grid>
+                                </Button>
+
+                                <TextBlock Canvas.Left="0" Canvas.Top="250" Width="186" TextAlignment="Center" 
+                                           Text="РЕЙС-105М1" FontWeight="Bold" FontSize="14" Foreground="#0A369D" />
+
+                                <TextBlock Canvas.Left="0" Canvas.Top="268" Width="186" TextAlignment="Center" 
+                                           Text="РЕФЛЕКТОМЕТР" FontWeight="Bold" FontSize="8" Foreground="#0A369D" />
+
+                                <TextBlock Canvas.Left="0" Canvas.Top="279" Width="186" TextAlignment="Center" 
+                                           Text="ПОРТАТИВНЫЙ ЦИФРОВОЙ" FontWeight="Bold" FontSize="8" Foreground="#0A369D" />
+
+                                <Grid Canvas.Left="0" Canvas.Top="296" Width="186">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Canvas Width="16" Height="15" Margin="0,0,8,0">
+                                            <Path Data="M 8,0 L 16,5.5 L 13,15 L 3,15 L 0,5.5 Z" 
+                                                  Stroke="#0A369D" StrokeThickness="1.2" Fill="Transparent"/>
+                                            <Ellipse Canvas.Left="5" Canvas.Top="5.5" Width="6" Height="4" 
+                                                     Stroke="#0A369D" StrokeThickness="1.0" Fill="Transparent"/>
+                                            <Ellipse Canvas.Left="6.8" Canvas.Top="6.8" Width="2.4" Height="1.4" Fill="#0A369D"/>
+                                        </Canvas>
+
+                                        <Border BorderBrush="#0A369D" BorderThickness="1.2" CornerRadius="2" Padding="3,1,3,1" Background="Transparent">
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Border Width="11" Height="11" BorderBrush="#0A369D" BorderThickness="1" CornerRadius="5.5" Margin="0,0,3,0">
+                                                    <TextBlock Text="⚡" FontSize="7" FontWeight="Bold" Foreground="#0A369D" 
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-1,0,0"/>
+                                                </Border>
+                                                <TextBlock Text="STÉLL" FontWeight="ExtraBold" FontSize="11" Foreground="#0A369D" VerticalAlignment="Center"/>
+                                                <TextBlock Text="®" FontWeight="Bold" FontSize="7" Foreground="#0A369D" VerticalAlignment="Top" Margin="1,-1,0,0"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+                                </Grid>
+                            </Canvas>
+                        </Border>
+                    </Canvas>
+                </Canvas>
+            </Viewbox>
+
+            <Border Grid.Column="1" Background="#242933" BorderBrush="#3B4252" BorderThickness="1,0,0,0" Padding="20">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0">
+                        <TextBlock Text="ОБУЧАЮЩИЙ КУРС" Foreground="#60A5FA" FontWeight="Bold" FontSize="11" Margin="0,0,0,4"/>
+                        <TextBlock x:Name="TxtStepHeader" Text="Этап 1 из 8" Foreground="#94A3B8" FontSize="13" Margin="0,0,0,4"/>
+                        <TextBlock x:Name="TxtStepTitle" Text="Назначение прибора и ТБ" Foreground="#FFFFFF" FontWeight="Bold" FontSize="17" TextWrapping="Wrap" Margin="0,0,0,12"/>
+                        
+                        <ProgressBar x:Name="StepProgress" Height="4" Value="12.5" Maximum="100" Background="#334155" Foreground="#3B82F6" BorderThickness="0" Margin="0,0,0,14"/>
+
+                        <Border Background="#1E232D" CornerRadius="8" Padding="10" BorderBrush="#333A48" BorderThickness="1" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="ТОЧКА ПОДКЛЮЧЕНИЯ КАБЕЛЯ" Foreground="#94A3B8" FontWeight="Bold" FontSize="9.5" Margin="0,0,0,8"/>
+                                <UniformGrid Columns="3">
+                                    <Button x:Name="BtnPort1" Content="ВХОД 1" Click="OnSelectPort1Clicked" Style="{StaticResource NavButton}" Padding="4,6" FontSize="10.5" Margin="0,0,3,0"/>
+                                    <Button x:Name="BtnPort2" Content="ВХОД 2" Click="OnSelectPort2Clicked" Style="{StaticResource SecondaryNavButton}" Padding="4,6" FontSize="10.5" Margin="2,0,2,0"/>
+                                    <Button x:Name="BtnUnplug" Content="Отключить" Click="OnUnplugClicked" Style="{StaticResource SecondaryNavButton}" Padding="4,6" FontSize="10.5" Margin="3,0,0,0"/>
+                                </UniformGrid>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="#1E232D" CornerRadius="8" Padding="10" BorderBrush="#333A48" BorderThickness="1" Margin="0,0,0,14">
+                            <StackPanel>
+                                <TextBlock Text="РЕЖИМ ЭКРАНА И СЕТКА ДИСПЛЕЯ" Foreground="#94A3B8" FontWeight="Bold" FontSize="9.5" Margin="0,0,0,8"/>
+                                <UniformGrid Columns="3" Margin="0,0,0,4">
+                                    <Button x:Name="BtnScreenTrace" Content="📈 РФГ" Click="OnScreenTraceClicked" Style="{StaticResource NavButton}" Padding="2,6" FontSize="10" Margin="0,0,2,0"/>
+                                    <Button x:Name="BtnGridToggle" Content="⊞ Сетка" Click="OnGridToggleClicked" Style="{StaticResource SecondaryNavButton}" Padding="2,6" FontSize="10" Margin="2,0,2,0"/>
+                                    <Button x:Name="BtnScreenMenu" Content="📋 Меню" Click="OnScreenMenuClicked" Style="{StaticResource SecondaryNavButton}" Padding="2,6" FontSize="10" Margin="2,0,0,0"/>
+                                </UniformGrid>
+                                <UniformGrid Columns="2">
+                                    <Button x:Name="BtnScreenCables" Content="📚 Кабели" Click="OnScreenCablesClicked" Style="{StaticResource SecondaryNavButton}" Padding="2,6" FontSize="10" Margin="0,0,2,0"/>
+                                    <Button x:Name="BtnScreenParams" Content="⚙ Параметры" Click="OnScreenParamsClicked" Style="{StaticResource SecondaryNavButton}" Padding="2,6" FontSize="10" Margin="2,0,0,0"/>
+                                </UniformGrid>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,16" Padding="0,0,6,0">
+                        <StackPanel>
+                            <Border x:Name="InspectorCard" Background="#1A2638" CornerRadius="8" Padding="14" BorderBrush="#38BDF8" BorderThickness="1.5" Margin="0,0,0,14">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                        <Border Background="#0284C7" CornerRadius="4" Width="18" Height="18" Margin="0,0,6,0">
+                                            <TextBlock Text="ℹ" Foreground="White" FontWeight="Bold" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <TextBlock Text="ИНСПЕКТОР ОРГАНА УПРАВЛЕНИЯ" Foreground="#38BDF8" FontWeight="Bold" FontSize="10" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <TextBlock x:Name="TxtInspectorKeyTitle" Text="Нажмите любую кнопку на приборе" Foreground="#FFFFFF" FontWeight="Bold" FontSize="13.5" Margin="0,0,0,6"/>
+                                    <TextBlock x:Name="TxtInspectorSummary" Text="Кликните на кнопку лицевой панели рефлектометра, чтобы получить подробное описание функции и физического смысла из руководства по эксплуатации." 
+                                               Foreground="#94A3B8" FontSize="12" LineHeight="17" TextWrapping="Wrap" Margin="0,0,0,6"/>
+                                    <TextBlock x:Name="TxtInspectorDetail" Text="" Foreground="#E2E8F0" FontSize="11.5" LineHeight="16" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Background="#1E232D" CornerRadius="8" Padding="14" BorderBrush="#333A48" BorderThickness="1" Margin="0,0,0,14">
+                                <TextBlock x:Name="TxtStepDescription" 
+                                           Text="РЕЙС-105М1 — цифровой портативный рефлектометр, предназначенный для обнаружения повреждений и неоднородностей в силовых кабелях и линиях связи. Перед подключением линию необходимо обязательно отключить с обеих сторон и разрядить жилы на землю!" 
+                                           Foreground="#CBD5E1" FontSize="13" LineHeight="19" TextWrapping="Wrap"/>
+                            </Border>
+
+                            <Border Background="#1E232D" CornerRadius="8" Padding="12" BorderBrush="#333A48" BorderThickness="1" Margin="0,0,0,14">
+                                <StackPanel>
+                                    <TextBlock Text="ПАРАМЕТРЫ СИМУЛЯЦИИ" Foreground="#94A3B8" FontWeight="Bold" FontSize="9.5" Margin="0,0,0,8"/>
+                                    <Grid Margin="0,0,0,5">
+                                        <TextBlock Text="Активный разъем:" Foreground="#64748B" FontSize="11.5"/>
+                                        <TextBlock x:Name="TxtInfoPort" Text="ВХОД 1" Foreground="#38BDF8" FontWeight="Bold" FontSize="11.5" HorizontalAlignment="Right"/>
+                                    </Grid>
+                                    <Grid Margin="0,0,0,5">
+                                        <TextBlock Text="Сетка дисплея:" Foreground="#64748B" FontSize="11.5"/>
+                                        <TextBlock x:Name="TxtInfoGrid" Text="Засечки" Foreground="#38BDF8" FontWeight="Bold" FontSize="11.5" HorizontalAlignment="Right"/>
+                                    </Grid>
+                                    <Grid Margin="0,0,0,5">
+                                        <TextBlock Text="Диапазон:" Foreground="#64748B" FontSize="11.5"/>
+                                        <TextBlock x:Name="TxtInfoRange" Text="100.0 м" Foreground="#F8FAFC" FontWeight="SemiBold" FontSize="11.5" HorizontalAlignment="Right"/>
+                                    </Grid>
+                                    <Grid Margin="0,0,0,5">
+                                        <TextBlock Text="Коэфф. укорочения (КУ):" Foreground="#64748B" FontSize="11.5"/>
+                                        <TextBlock x:Name="TxtInfoShortening" Text="1.500" Foreground="#F8FAFC" FontWeight="SemiBold" FontSize="11.5" HorizontalAlignment="Right"/>
+                                    </Grid>
+                                    <Grid Margin="0,0,0,5">
+                                        <TextBlock Text="Расстояние между курсорами:" Foreground="#64748B" FontSize="11.5"/>
+                                        <TextBlock x:Name="TxtInfoDistance" Text="40.00 м" Foreground="#38BDF8" FontWeight="Bold" FontSize="11.5" HorizontalAlignment="Right"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <TextBlock Text="БЫСТРЫЙ ПЕРЕХОД ПО ЭТАПАМ:" Foreground="#94A3B8" FontWeight="Bold" FontSize="9.5" Margin="0,0,0,6"/>
+                            <ListBox x:Name="StepsListBox" Background="Transparent" BorderThickness="0" SelectionChanged="OnStepSelected">
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="Foreground" Value="#CBD5E1"/>
+                                        <Setter Property="FontSize" Value="11.5"/>
+                                        <Setter Property="Padding" Value="8,6"/>
+                                        <Setter Property="Margin" Value="0,1"/>
+                                        <Setter Property="Cursor" Value="Hand"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ListBoxItem">
+                                                    <Border x:Name="bd" Background="Transparent" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="bd" Property="Background" Value="#2D3442"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsSelected" Value="True">
+                                                            <Setter TargetName="bd" Property="Background" Value="#1E3A8A"/>
+                                                            <Setter Property="Foreground" Value="#93C5FD"/>
+                                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                                <ListBoxItem Content="1. Назначение прибора и ТБ"/>
+                                <ListBoxItem Content="2. Подключение кабельной линии"/>
+                                <ListBoxItem Content="3. Включение и калибровка шкалы"/>
+                                <ListBoxItem Content="4. Настройка координатной сетки"/>
+                                <ListBoxItem Content="5. Библиотека кабелей и выбор КУ"/>
+                                <ListBoxItem Content="6. Настройка усиления и диапазона"/>
+                                <ListBoxItem Content="7. Локализация обрыва жилы"/>
+                                <ListBoxItem Content="8. Локализация короткого замыкания (КЗ)"/>
+                            </ListBox>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0" Content="◀ Назад" Click="OnPrevStepClicked" Style="{StaticResource SecondaryNavButton}" Margin="0,0,6,0"/>
+                        <Button Grid.Column="1" Content="Далее ▶" Click="OnNextStepClicked" Style="{StaticResource NavButton}" Margin="6,0,0,0"/>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Диалоговое модальное окно «О программе» -->
+        <Grid x:Name="AboutModal" Grid.RowSpan="2" Background="#A00F172A" Visibility="Collapsed" Panel.ZIndex="100">
+            <Border Width="560" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                    Background="#1E242F" BorderBrush="#38BDF8" BorderThickness="1.5" CornerRadius="12" Padding="28">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="40" ShadowDepth="12" Direction="270" Color="#000000" Opacity="0.6"/>
+                </Border.Effect>
+                <StackPanel>
+                    <Grid Margin="0,0,0,16">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Border Background="#2563EB" CornerRadius="6" Width="30" Height="30" Margin="0,0,10,0">
+                                <TextBlock Text="∿" Foreground="White" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <TextBlock Text="О ПРОГРАММНОМ КОМПЛЕКСЕ" Foreground="#FFFFFF" FontWeight="Bold" FontSize="16" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <Button Content="✕" Click="OnCloseAboutClicked" Style="{StaticResource SecondaryNavButton}" 
+                                HorizontalAlignment="Right" Padding="8,4" FontSize="12"/>
+                    </Grid>
+
+                    <Border Background="#151A22" CornerRadius="8" Padding="14" BorderBrush="#2D3748" BorderThickness="1" Margin="0,0,0,14">
+                        <StackPanel>
+                            <TextBlock Text="ИНТЕРАКТИВНЫЙ ОБУЧАЮЩИЙ СТЕНД" Foreground="#38BDF8" FontWeight="Bold" FontSize="12" Margin="0,0,0,4"/>
+                            <TextBlock Text="Цифровой портативный рефлектометр РЕЙС-105М1" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="13.5" Margin="0,0,0,6"/>
+                            <TextBlock Text="Тренажер предназначен для отработки практических навыков рефлектометрии: обнаружения повреждений (обрыв, короткое замыкание), определения расстояний до неоднородностей в кабельных и воздушных линиях связи и электропередачи, настройки коэффициентов укорочения и работы с сервисными режимами прибора." 
+                                       Foreground="#94A3B8" FontSize="12" LineHeight="17" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Grid Margin="0,0,0,18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" Background="#151A22" CornerRadius="8" Padding="12" BorderBrush="#2D3748" BorderThickness="1" Margin="0,0,6,0">
+                            <StackPanel>
+                                <TextBlock Text="РАЗРАБОТЧИК" Foreground="#60A5FA" FontWeight="Bold" FontSize="10.5" Margin="0,0,0,4"/>
+                                <TextBlock Text="Кравчук Светозар Кириллович" Foreground="#FFFFFF" FontWeight="Bold" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                                <TextBlock Text="Разработка архитектуры симулятора, графического интерфейса и физической модели рефлектометрии" Foreground="#94A3B8" FontSize="11" TextWrapping="Wrap" LineHeight="15"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Column="1" Background="#151A22" CornerRadius="8" Padding="12" BorderBrush="#2D3748" BorderThickness="1" Margin="6,0,0,0">
+                            <StackPanel>
+                                <TextBlock Text="НАУЧНЫЙ РУКОВОДИТЕЛЬ" Foreground="#60A5FA" FontWeight="Bold" FontSize="10.5" Margin="0,0,0,4"/>
+                                <TextBlock Text="Буланов Михаил Юрьевич" Foreground="#FFFFFF" FontWeight="Bold" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                                <TextBlock Text="Научное руководство, методическая верификация алгоритмов измерений и сценариев обучения" Foreground="#94A3B8" FontSize="11" TextWrapping="Wrap" LineHeight="15"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Button Content="Закрыть" Click="OnCloseAboutClicked" Style="{StaticResource NavButton}" HorizontalAlignment="Right" Padding="20,8"/>
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </Window>
