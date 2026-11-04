@@ -177,7 +177,10 @@
             <Grid>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <Border Background="#2563EB" CornerRadius="6" Width="28" Height="28" Margin="0,0,10,0">
-                        <TextBlock Text="∿" Foreground="White" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-2,0,0"/>
+                        <Grid>
+                            <TextBlock x:Name="AppLogoGlyph" Text="∿" Foreground="White" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-2,0,0"/>
+                            <Image x:Name="AppLogoImage" Margin="3" Stretch="Uniform" Visibility="Collapsed"/>
+                        </Grid>
                     </Border>
                     <TextBlock Text="РЕЙС-105М1" Foreground="#FFFFFF" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0"/>
                     <Border Background="#374151" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
@@ -419,7 +422,7 @@
                             </Border>
                         </Border>
 
-                        <Border Canvas.Left="47" Canvas.Top="216" Width="186" Height="356"
+                        <Border Canvas.Left="47" Canvas.Top="216" Width="186" Height="356" 
                                 Background="#EDE9DE" BorderBrush="#0A369D" BorderThickness="2" CornerRadius="10">
                             <Canvas>
                                 <Border Canvas.Left="10" Canvas.Top="10" Width="46" Height="48" BorderBrush="#0A369D" BorderThickness="1.5" CornerRadius="6" Background="#ECE8DE">
