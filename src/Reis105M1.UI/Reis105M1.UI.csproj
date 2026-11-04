@@ -6,7 +6,10 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <ApplicationIcon Condition="Exists('..\..\assets\icon\app.ico')">..\..\assets\icon\app.ico</ApplicationIcon>
+    
+    <!-- Иконка для EXE в проводнике Windows -->
+    <ApplicationIcon Condition="Exists('..\..\assets\icon\reis_icon.ico')">..\..\assets\icon\reis_icon.ico</ApplicationIcon>
+    <ApplicationIcon Condition="!Exists('..\..\assets\icon\reis_icon.ico') and Exists('..\..\assets\icon\reis_icon.ico')">..\..\assets\icon\reis_icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,11 +17,11 @@
     <ProjectReference Include="..\Reis105M1.Display\Reis105M1.Display.csproj" />
   </ItemGroup>
 
+  <!-- Вшиваем все файлы из assets внутрь сборки для автономной работы на рабочем столе -->
   <ItemGroup>
-    <Content Include="..\..\assets\**\*.*">
-      <Link>assets\%(RecursiveDir)%(Filename)%(Extension)</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <EmbeddedResource Include="..\..\assets\**\*.*">
+      <LogicalName>assets/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>
