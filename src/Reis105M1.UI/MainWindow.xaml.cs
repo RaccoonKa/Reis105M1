@@ -1,9 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Media;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
 using Reis105M1.Core.Engine;
 using Reis105M1.Core.Models;
 using Reis105M1.Display;
@@ -32,9 +36,13 @@ public partial class MainWindow : Window
     private int _currentStepIndex = 0;
     private int _selectedPort = 1;
 
+    private SoundPlayer? _clickSoundPlayer;
+    private MediaPlayer? _clickMediaPlayer;
+
     public MainWindow()
     {
         InitializeComponent();
+        InitializeAssets();
 
         _state = new DeviceState
         {
@@ -235,6 +243,95 @@ public partial class MainWindow : Window
         LcdImage.Source = _lcdBuffer.Bitmap;
         StepsListBox.SelectedIndex = 0;
         ApplyStep(0);
+    }
+
+    private void InitializeAssets()
+    {
+        // 1. Динамическая загрузка иконки окна и шапки
+        try
+        {
+            string iconDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "assets", "icon");
+            if (Directory.Exists(iconDir))
+            {
+                var iconFiles = Directory.GetFiles(iconDir, "*.ico");
+                if (iconFiles.Length == 0)
+                {
+                    iconFiles = Directory.GetFiles(iconDir, "*.*");
+                }
+
+                if (iconFiles.Length > 0)
+                {
+                    var iconUri = new Uri(iconFiles[0], UriKind.Absolute);
+                    var iconBitmap = new BitmapImage(iconUri);
+                    this.Icon = iconBitmap;
+
+                    if (AppLogoImage != null && AppLogoGlyph != null)
+                    {
+                        AppLogoImage.Source = iconBitmap;
+                        AppLogoImage.Visibility = Visibility.Visible;
+                        AppLogoGlyph.Visibility = Visibility.Collapsed;
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // Fallback: при отсутствии графического файла сохраняется дефолтный глиф шапки
+        }
+
+        // 2. Инициализация звука клавиш с автоопределением .wav / .mp3
+        try
+        {
+            string soundDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "assets", "sound");
+            if (Directory.Exists(soundDir))
+            {
+                var wavFiles = Directory.GetFiles(soundDir, "*.wav");
+                if (wavFiles.Length > 0)
+                {
+                    _clickSoundPlayer = new SoundPlayer(wavFiles[0]);
+                    _clickSoundPlayer.LoadAsync();
+                }
+                else
+                {
+                    var audioFiles = Directory.GetFiles(soundDir, "*.*");
+                    if (audioFiles.Length > 0)
+                    {
+                        _clickMediaPlayer = new MediaPlayer();
+                        _clickMediaPlayer.Open(new Uri(audioFiles[0], UriKind.Absolute));
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // Игнорируем ошибки отсутствия аудиокарты или кодеков
+        }
+
+        // Глобальный перехватчик событий клика по любой кнопке приложения
+        EventManager.RegisterClassHandler(
+            typeof(Button), 
+            ButtonBase.ClickEvent, 
+            new RoutedEventHandler(OnGlobalButtonClick));
+    }
+
+    private void OnGlobalButtonClick(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            if (_clickSoundPlayer != null)
+            {
+                _clickSoundPlayer.Play();
+            }
+            else if (_clickMediaPlayer != null)
+            {
+                _clickMediaPlayer.Position = TimeSpan.Zero;
+                _clickMediaPlayer.Play();
+            }
+        }
+        catch
+        {
+            // Не прерываем UI-поток при ошибках воспроизведения звука
+        }
     }
 
     private string GetStepDescription(int stepIndex, int port)

@@ -1,16 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <ItemGroup>
-    <ProjectReference Include="..\Reis105M1.Core\Reis105M1.Core.csproj" />
-    <ProjectReference Include="..\Reis105M1.Display\Reis105M1.Display.csproj" />
-  </ItemGroup>
-
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon Condition="Exists('..\..\assets\icon\app.ico')">..\..\assets\icon\app.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Reis105M1.Core\Reis105M1.Core.csproj" />
+    <ProjectReference Include="..\Reis105M1.Display\Reis105M1.Display.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\..\assets\**\*.*">
+      <Link>assets\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
 </Project>
