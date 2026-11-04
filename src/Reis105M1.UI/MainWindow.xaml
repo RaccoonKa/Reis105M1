@@ -186,6 +186,7 @@
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button Content="ℹ О программе" Click="OnAboutClicked" Style="{StaticResource SecondaryNavButton}" Padding="12,6" FontSize="11" Margin="0,0,8,0"/>
                     <Button Content="Свернуть" Click="OnMinimizeAppClicked" Style="{StaticResource SecondaryNavButton}" Padding="12,6" FontSize="11" Margin="0,0,8,0"/>
                     <Button Content="✕ Выход" Click="OnCloseAppClicked" Style="{StaticResource NavButton}" Background="#DC2626" Padding="14,6" FontSize="11"/>
                 </StackPanel>
@@ -273,30 +274,30 @@
                     <Path Stroke="#111827" StrokeThickness="16" Opacity="0.25" Canvas.Left="0" Canvas.Top="10">
                         <Path.Data>
                             <PathGeometry>
-                                <PathFigure x:Name="CableShadowFigure" StartPoint="134, 353">
-                                    <BezierSegment x:Name="CableShadowBezier" Point1="297, 277" Point2="557, -20" Point3="557, 46" />
+                                <PathFigure x:Name="CableShadowFigure" StartPoint="122, 364">
+                                    <BezierSegment x:Name="CableShadowBezier" Point1="268, 258" Point2="557, -20" Point3="557, 46" />
                                 </PathFigure>
                             </PathGeometry>
                         </Path.Data>
                     </Path>
 
-                    <Path Stroke="#B45309" StrokeThickness="14" StrokeStartLineCap="Round" Canvas.Left="0" Canvas.Top="0">
+                    <Path Stroke="#B45309" StrokeThickness="14" Canvas.Left="0" Canvas.Top="0">
                         <Path.Data>
                             <PathGeometry>
-                                <PathFigure x:Name="CableBorderFigure" StartPoint="85, 420">
-                                    <ArcSegment Point="134, 343" Size="85,85" SweepDirection="Clockwise" IsLargeArc="False"/>
-                                    <BezierSegment x:Name="CableBorderBezier" Point1="297, 267" Point2="557, -30" Point3="557, 36" />
+                                <PathFigure x:Name="CableBorderFigure" StartPoint="170, 502">
+                                    <ArcSegment Point="122, 354" Size="82,82" SweepDirection="Clockwise" IsLargeArc="False"/>
+                                    <BezierSegment x:Name="CableBorderBezier" Point1="268, 248" Point2="557, -30" Point3="557, 36" />
                                 </PathFigure>
                             </PathGeometry>
                         </Path.Data>
                     </Path>
 
-                    <Path Stroke="#F59E0B" StrokeThickness="10" StrokeStartLineCap="Round" Canvas.Left="0" Canvas.Top="0">
+                    <Path Stroke="#F59E0B" StrokeThickness="10" Canvas.Left="0" Canvas.Top="0">
                         <Path.Data>
                             <PathGeometry>
-                                <PathFigure x:Name="CableFigure" StartPoint="85, 420">
-                                    <ArcSegment Point="134, 343" Size="85,85" SweepDirection="Clockwise" IsLargeArc="False"/>
-                                    <BezierSegment x:Name="CableBezier" Point1="297, 267" Point2="557, -30" Point3="557, 36" />
+                                <PathFigure x:Name="CableFigure" StartPoint="170, 502">
+                                    <ArcSegment Point="122, 354" Size="82,82" SweepDirection="Clockwise" IsLargeArc="False"/>
+                                    <BezierSegment x:Name="CableBezier" Point1="268, 248" Point2="557, -30" Point3="557, 36" />
                                 </PathFigure>
                             </PathGeometry>
                         </Path.Data>
@@ -418,7 +419,7 @@
                             </Border>
                         </Border>
 
-                        <Border Canvas.Left="47" Canvas.Top="216" Width="186" Height="356" 
+                        <Border Canvas.Left="47" Canvas.Top="216" Width="186" Height="356"
                                 Background="#EDE9DE" BorderBrush="#0A369D" BorderThickness="2" CornerRadius="10">
                             <Canvas>
                                 <Border Canvas.Left="10" Canvas.Top="10" Width="46" Height="48" BorderBrush="#0A369D" BorderThickness="1.5" CornerRadius="6" Background="#ECE8DE">
@@ -693,18 +694,33 @@
 
                     <StackPanel Grid.Row="0">
                         <TextBlock Text="ОБУЧАЮЩИЙ КУРС" Foreground="#60A5FA" FontWeight="Bold" FontSize="11" Margin="0,0,0,4"/>
-                        <TextBlock x:Name="TxtStepHeader" Text="Этап 1 из 6" Foreground="#94A3B8" FontSize="13" Margin="0,0,0,4"/>
+                        <TextBlock x:Name="TxtStepHeader" Text="Этап 1 из 8" Foreground="#94A3B8" FontSize="13" Margin="0,0,0,4"/>
                         <TextBlock x:Name="TxtStepTitle" Text="Назначение прибора и ТБ" Foreground="#FFFFFF" FontWeight="Bold" FontSize="17" TextWrapping="Wrap" Margin="0,0,0,12"/>
                         
-                        <ProgressBar x:Name="StepProgress" Height="4" Value="16.6" Maximum="100" Background="#334155" Foreground="#3B82F6" BorderThickness="0" Margin="0,0,0,14"/>
+                        <ProgressBar x:Name="StepProgress" Height="4" Value="12.5" Maximum="100" Background="#334155" Foreground="#3B82F6" BorderThickness="0" Margin="0,0,0,14"/>
 
-                        <Border Background="#1E232D" CornerRadius="8" Padding="10" BorderBrush="#333A48" BorderThickness="1" Margin="0,0,0,14">
+                        <Border Background="#1E232D" CornerRadius="8" Padding="10" BorderBrush="#333A48" BorderThickness="1" Margin="0,0,0,10">
                             <StackPanel>
                                 <TextBlock Text="ТОЧКА ПОДКЛЮЧЕНИЯ КАБЕЛЯ" Foreground="#94A3B8" FontWeight="Bold" FontSize="9.5" Margin="0,0,0,8"/>
                                 <UniformGrid Columns="3">
                                     <Button x:Name="BtnPort1" Content="ВХОД 1" Click="OnSelectPort1Clicked" Style="{StaticResource NavButton}" Padding="4,6" FontSize="10.5" Margin="0,0,3,0"/>
                                     <Button x:Name="BtnPort2" Content="ВХОД 2" Click="OnSelectPort2Clicked" Style="{StaticResource SecondaryNavButton}" Padding="4,6" FontSize="10.5" Margin="2,0,2,0"/>
                                     <Button x:Name="BtnUnplug" Content="Отключить" Click="OnUnplugClicked" Style="{StaticResource SecondaryNavButton}" Padding="4,6" FontSize="10.5" Margin="3,0,0,0"/>
+                                </UniformGrid>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="#1E232D" CornerRadius="8" Padding="10" BorderBrush="#333A48" BorderThickness="1" Margin="0,0,0,14">
+                            <StackPanel>
+                                <TextBlock Text="РЕЖИМ ЭКРАНА И СЕТКА ДИСПЛЕЯ" Foreground="#94A3B8" FontWeight="Bold" FontSize="9.5" Margin="0,0,0,8"/>
+                                <UniformGrid Columns="3" Margin="0,0,0,4">
+                                    <Button x:Name="BtnScreenTrace" Content="📈 РФГ" Click="OnScreenTraceClicked" Style="{StaticResource NavButton}" Padding="2,6" FontSize="10" Margin="0,0,2,0"/>
+                                    <Button x:Name="BtnGridToggle" Content="⊞ Сетка" Click="OnGridToggleClicked" Style="{StaticResource SecondaryNavButton}" Padding="2,6" FontSize="10" Margin="2,0,2,0"/>
+                                    <Button x:Name="BtnScreenMenu" Content="📋 Меню" Click="OnScreenMenuClicked" Style="{StaticResource SecondaryNavButton}" Padding="2,6" FontSize="10" Margin="2,0,0,0"/>
+                                </UniformGrid>
+                                <UniformGrid Columns="2">
+                                    <Button x:Name="BtnScreenCables" Content="📚 Кабели" Click="OnScreenCablesClicked" Style="{StaticResource SecondaryNavButton}" Padding="2,6" FontSize="10" Margin="0,0,2,0"/>
+                                    <Button x:Name="BtnScreenParams" Content="⚙ Параметры" Click="OnScreenParamsClicked" Style="{StaticResource SecondaryNavButton}" Padding="2,6" FontSize="10" Margin="2,0,0,0"/>
                                 </UniformGrid>
                             </StackPanel>
                         </Border>
@@ -739,6 +755,10 @@
                                     <Grid Margin="0,0,0,5">
                                         <TextBlock Text="Активный разъем:" Foreground="#64748B" FontSize="11.5"/>
                                         <TextBlock x:Name="TxtInfoPort" Text="ВХОД 1" Foreground="#38BDF8" FontWeight="Bold" FontSize="11.5" HorizontalAlignment="Right"/>
+                                    </Grid>
+                                    <Grid Margin="0,0,0,5">
+                                        <TextBlock Text="Сетка дисплея:" Foreground="#64748B" FontSize="11.5"/>
+                                        <TextBlock x:Name="TxtInfoGrid" Text="Засечки" Foreground="#38BDF8" FontWeight="Bold" FontSize="11.5" HorizontalAlignment="Right"/>
                                     </Grid>
                                     <Grid Margin="0,0,0,5">
                                         <TextBlock Text="Диапазон:" Foreground="#64748B" FontSize="11.5"/>
@@ -788,9 +808,11 @@
                                 <ListBoxItem Content="1. Назначение прибора и ТБ"/>
                                 <ListBoxItem Content="2. Подключение кабельной линии"/>
                                 <ListBoxItem Content="3. Включение и калибровка шкалы"/>
-                                <ListBoxItem Content="4. Настройка укорочения и диапазона"/>
-                                <ListBoxItem Content="5. Локализация обрыва жилы"/>
-                                <ListBoxItem Content="6. Локализация короткого замыкания (КЗ)"/>
+                                <ListBoxItem Content="4. Настройка координатной сетки"/>
+                                <ListBoxItem Content="5. Библиотека кабелей и выбор КУ"/>
+                                <ListBoxItem Content="6. Настройка усиления и диапазона"/>
+                                <ListBoxItem Content="7. Локализация обрыва жилы"/>
+                                <ListBoxItem Content="8. Локализация короткого замыкания (КЗ)"/>
                             </ListBox>
                         </StackPanel>
                     </ScrollViewer>
@@ -805,6 +827,62 @@
                         <Button Grid.Column="1" Content="Далее ▶" Click="OnNextStepClicked" Style="{StaticResource NavButton}" Margin="6,0,0,0"/>
                     </Grid>
                 </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Диалоговое модальное окно «О программе» -->
+        <Grid x:Name="AboutModal" Grid.RowSpan="2" Background="#A00F172A" Visibility="Collapsed" Panel.ZIndex="100">
+            <Border Width="560" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                    Background="#1E242F" BorderBrush="#38BDF8" BorderThickness="1.5" CornerRadius="12" Padding="28">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="40" ShadowDepth="12" Direction="270" Color="#000000" Opacity="0.6"/>
+                </Border.Effect>
+                <StackPanel>
+                    <Grid Margin="0,0,0,16">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Border Background="#2563EB" CornerRadius="6" Width="30" Height="30" Margin="0,0,10,0">
+                                <TextBlock Text="∿" Foreground="White" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <TextBlock Text="О ПРОГРАММНОМ КОМПЛЕКСЕ" Foreground="#FFFFFF" FontWeight="Bold" FontSize="16" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <Button Content="✕" Click="OnCloseAboutClicked" Style="{StaticResource SecondaryNavButton}" 
+                                HorizontalAlignment="Right" Padding="8,4" FontSize="12"/>
+                    </Grid>
+
+                    <Border Background="#151A22" CornerRadius="8" Padding="14" BorderBrush="#2D3748" BorderThickness="1" Margin="0,0,0,14">
+                        <StackPanel>
+                            <TextBlock Text="ИНТЕРАКТИВНЫЙ ОБУЧАЮЩИЙ СТЕНД" Foreground="#38BDF8" FontWeight="Bold" FontSize="12" Margin="0,0,0,4"/>
+                            <TextBlock Text="Цифровой портативный рефлектометр РЕЙС-105М1" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="13.5" Margin="0,0,0,6"/>
+                            <TextBlock Text="Тренажер предназначен для отработки практических навыков рефлектометрии: обнаружения повреждений (обрыв, короткое замыкание), определения расстояний до неоднородностей в кабельных и воздушных линиях связи и электропередачи, настройки коэффициентов укорочения и работы с сервисными режимами прибора." 
+                                       Foreground="#94A3B8" FontSize="12" LineHeight="17" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Grid Margin="0,0,0,18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" Background="#151A22" CornerRadius="8" Padding="12" BorderBrush="#2D3748" BorderThickness="1" Margin="0,0,6,0">
+                            <StackPanel>
+                                <TextBlock Text="РАЗРАБОТЧИК" Foreground="#60A5FA" FontWeight="Bold" FontSize="10.5" Margin="0,0,0,4"/>
+                                <TextBlock Text="Кравчук Светозар Кириллович" Foreground="#FFFFFF" FontWeight="Bold" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                                <TextBlock Text="Разработка архитектуры симулятора, графического интерфейса и физической модели рефлектометрии" Foreground="#94A3B8" FontSize="11" TextWrapping="Wrap" LineHeight="15"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Column="1" Background="#151A22" CornerRadius="8" Padding="12" BorderBrush="#2D3748" BorderThickness="1" Margin="6,0,0,0">
+                            <StackPanel>
+                                <TextBlock Text="НАУЧНЫЙ РУКОВОДИТЕЛЬ" Foreground="#60A5FA" FontWeight="Bold" FontSize="10.5" Margin="0,0,0,4"/>
+                                <TextBlock Text="Буланов Михаил Юрьевич" Foreground="#FFFFFF" FontWeight="Bold" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                                <TextBlock Text="Научное руководство, методическая верификация алгоритмов измерений и сценариев обучения" Foreground="#94A3B8" FontSize="11" TextWrapping="Wrap" LineHeight="15"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Button Content="Закрыть" Click="OnCloseAboutClicked" Style="{StaticResource NavButton}" HorizontalAlignment="Right" Padding="20,8"/>
+                </StackPanel>
             </Border>
         </Grid>
     </Grid>
