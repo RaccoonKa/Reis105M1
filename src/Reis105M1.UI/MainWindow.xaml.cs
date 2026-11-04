@@ -37,7 +37,6 @@ public partial class MainWindow : Window
     private int _selectedPort = 1;
 
     private SoundPlayer? _clickSoundPlayer;
-    private MediaPlayer? _clickMediaPlayer;
 
     public MainWindow()
     {
@@ -245,69 +244,171 @@ public partial class MainWindow : Window
         ApplyStep(0);
     }
 
+    private static Stream? FindAssetStream(string extension, string subfolderHint)
+    {
+        try
+        {
+            var asm = typeof(MainWindow).Assembly;
+            var resNames = asm.GetManifestResourceNames();
+
+            foreach (var name in resNames)
+            {
+                if (name.IndexOf(subfolderHint, StringComparison.OrdinalIgnoreCase) >= 0 &&
+                    name.EndsWith(extension, StringComparison.OrdinalIgnoreCase))
+                {
+                    var stream = asm.GetManifestResourceStream(name);
+                    if (stream != null)
+                    {
+                        var ms = new MemoryStream();
+                        stream.CopyTo(ms);
+                        ms.Position = 0;
+                        return ms;
+                    }
+                }
+            }
+
+            foreach (var name in resNames)
+            {
+                if (name.EndsWith(extension, StringComparison.OrdinalIgnoreCase))
+                {
+                    var stream = asm.GetManifestResourceStream(name);
+                    if (stream != null)
+                    {
+                        var ms = new MemoryStream();
+                        stream.CopyTo(ms);
+                        ms.Position = 0;
+                        return ms;
+                    }
+                }
+            }
+        }
+        catch { }
+
+        try
+        {
+            string[] searchDirs = {
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "assets", subfolderHint),
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, subfolderHint),
+                Path.Combine(Directory.GetCurrentDirectory(), "assets", subfolderHint),
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "assets", subfolderHint)
+            };
+
+            foreach (var dir in searchDirs)
+            {
+                if (Directory.Exists(dir))
+                {
+                    var files = Directory.GetFiles(dir, "*" + extension);
+                    if (files.Length > 0)
+                    {
+                        return new MemoryStream(File.ReadAllBytes(files[0]));
+                    }
+                }
+            }
+        }
+        catch { }
+
+        return null;
+    }
+
+    private static MemoryStream CreateSynthesizedClickWav()
+    {
+        var ms = new MemoryStream();
+        using var bw = new BinaryWriter(ms, System.Text.Encoding.UTF8, leaveOpen: true);
+
+        int sampleRate = 22050;
+        int samples = (int)(sampleRate * 0.025);
+        short[] pcm = new short[samples];
+
+        for (int i = 0; i < samples; i++)
+        {
+            double t = (double)i / sampleRate;
+            double envelope = Math.Exp(-t * 240.0);
+            double wave = Math.Sin(2.0 * Math.PI * 1300.0 * t) * 0.65 + Math.Sin(2.0 * Math.PI * 650.0 * t) * 0.35;
+            pcm[i] = (short)(wave * envelope * 24000);
+        }
+
+        int subChunk2Size = samples * 2;
+        int chunkSize = 36 + subChunk2Size;
+
+        bw.Write(System.Text.Encoding.ASCII.GetBytes("RIFF"));
+        bw.Write(chunkSize);
+        bw.Write(System.Text.Encoding.ASCII.GetBytes("WAVE"));
+
+        bw.Write(System.Text.Encoding.ASCII.GetBytes("fmt "));
+        bw.Write(16);
+        bw.Write((short)1);
+        bw.Write((short)1);
+        bw.Write(sampleRate);
+        bw.Write(sampleRate * 2);
+        bw.Write((short)2);
+        bw.Write((short)16);
+
+        bw.Write(System.Text.Encoding.ASCII.GetBytes("data"));
+        bw.Write(subChunk2Size);
+        for (int i = 0; i < samples; i++)
+        {
+            bw.Write(pcm[i]);
+        }
+
+        bw.Flush();
+        ms.Position = 0;
+        return ms;
+    }
+
     private void InitializeAssets()
     {
-        // 1. Динамическая загрузка иконки окна и шапки
         try
         {
-            string iconDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "assets", "icon");
-            if (Directory.Exists(iconDir))
+            var iconStream = FindAssetStream(".ico", "icon") 
+                          ?? FindAssetStream(".png", "icon")
+                          ?? FindAssetStream(".ico", "")
+                          ?? FindAssetStream(".png", "");
+
+            if (iconStream != null)
             {
-                var iconFiles = Directory.GetFiles(iconDir, "*.ico");
-                if (iconFiles.Length == 0)
+                ImageSource? iconSource = null;
+                try
                 {
-                    iconFiles = Directory.GetFiles(iconDir, "*.*");
+                    iconSource = BitmapFrame.Create(iconStream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+                }
+                catch
+                {
+                    iconStream.Position = 0;
+                    var bmp = new BitmapImage();
+                    bmp.BeginInit();
+                    bmp.StreamSource = iconStream;
+                    bmp.CacheOption = BitmapCacheOption.OnLoad;
+                    bmp.EndInit();
+                    bmp.Freeze();
+                    iconSource = bmp;
                 }
 
-                if (iconFiles.Length > 0)
+                if (iconSource != null)
                 {
-                    var iconUri = new Uri(iconFiles[0], UriKind.Absolute);
-                    var iconBitmap = new BitmapImage(iconUri);
-                    this.Icon = iconBitmap;
+                    this.Icon = iconSource;
 
-                    if (AppLogoImage != null && AppLogoGlyph != null)
+                    var appLogoImage = FindName("AppLogoImage") as Image;
+                    var appLogoGlyph = FindName("AppLogoGlyph") as TextBlock;
+
+                    if (appLogoImage != null && appLogoGlyph != null)
                     {
-                        AppLogoImage.Source = iconBitmap;
-                        AppLogoImage.Visibility = Visibility.Visible;
-                        AppLogoGlyph.Visibility = Visibility.Collapsed;
+                        appLogoImage.Source = iconSource;
+                        appLogoImage.Visibility = Visibility.Visible;
+                        appLogoGlyph.Visibility = Visibility.Collapsed;
                     }
                 }
             }
         }
-        catch
-        {
-            // Fallback: при отсутствии графического файла сохраняется дефолтный глиф шапки
-        }
+        catch { }
 
-        // 2. Инициализация звука клавиш с автоопределением .wav / .mp3
         try
         {
-            string soundDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "assets", "sound");
-            if (Directory.Exists(soundDir))
-            {
-                var wavFiles = Directory.GetFiles(soundDir, "*.wav");
-                if (wavFiles.Length > 0)
-                {
-                    _clickSoundPlayer = new SoundPlayer(wavFiles[0]);
-                    _clickSoundPlayer.LoadAsync();
-                }
-                else
-                {
-                    var audioFiles = Directory.GetFiles(soundDir, "*.*");
-                    if (audioFiles.Length > 0)
-                    {
-                        _clickMediaPlayer = new MediaPlayer();
-                        _clickMediaPlayer.Open(new Uri(audioFiles[0], UriKind.Absolute));
-                    }
-                }
-            }
+            var soundStream = FindAssetStream(".wav", "sound") ?? CreateSynthesizedClickWav();
+            _clickSoundPlayer = new SoundPlayer(soundStream);
+            _clickSoundPlayer.Load();
         }
-        catch
-        {
-            // Игнорируем ошибки отсутствия аудиокарты или кодеков
-        }
+        catch { }
 
-        // Глобальный перехватчик событий клика по любой кнопке приложения
         EventManager.RegisterClassHandler(
             typeof(Button), 
             ButtonBase.ClickEvent, 
@@ -318,20 +419,9 @@ public partial class MainWindow : Window
     {
         try
         {
-            if (_clickSoundPlayer != null)
-            {
-                _clickSoundPlayer.Play();
-            }
-            else if (_clickMediaPlayer != null)
-            {
-                _clickMediaPlayer.Position = TimeSpan.Zero;
-                _clickMediaPlayer.Play();
-            }
+            _clickSoundPlayer?.Play();
         }
-        catch
-        {
-            // Не прерываем UI-поток при ошибках воспроизведения звука
-        }
+        catch { }
     }
 
     private string GetStepDescription(int stepIndex, int port)
