@@ -216,91 +216,201 @@
                         </Rectangle.Effect>
                     </Rectangle>
 
-                    <Canvas Canvas.Left="40" Canvas.Top="110" Width="360" Height="500">
-                        <Ellipse Canvas.Left="20" Canvas.Top="415" Width="240" Height="40" Fill="#1E232D" Opacity="0.4">
-                            <Ellipse.Effect>
-                                <BlurEffect Radius="15"/>
-                            </Ellipse.Effect>
-                        </Ellipse>
+                    <!-- Магистральный кабель, разделка жил и зажимы-крокодилы -->
+                    <Canvas Canvas.Left="30" Canvas.Top="50" Width="420" Height="730">
+                        <!-- Тень магистрального кабеля -->
+                        <Path Stroke="#0B0F17" StrokeThickness="66" StrokeStartLineCap="Flat" Opacity="0.45"
+                              Data="M -80,840 C 15,700 75,560 135,410">
+                            <Path.Effect>
+                                <BlurEffect Radius="22"/>
+                            </Path.Effect>
+                        </Path>
 
-                        <Rectangle Canvas.Left="45" Canvas.Top="435" Width="170" Height="12" Fill="#1E242E" RadiusX="4" RadiusY="4"/>
-                        <Rectangle Canvas.Left="40" Canvas.Top="443" Width="35" Height="6" Fill="#0F172A" RadiusX="2" RadiusY="2"/>
-                        <Rectangle Canvas.Left="180" Canvas.Top="443" Width="35" Height="6" Fill="#0F172A" RadiusX="2" RadiusY="2"/>
+                        <!-- Внешняя защитная оболочка магистрального кабеля с гладким скругленным торцом -->
+                        <Path StrokeThickness="46" StrokeStartLineCap="Flat" StrokeEndLineCap="Round">
+                            <Path.Stroke>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#090D14" Offset="0.0"/>
+                                    <GradientStop Color="#1E293B" Offset="0.28"/>
+                                    <GradientStop Color="#334155" Offset="0.58"/>
+                                    <GradientStop Color="#0F172A" Offset="0.88"/>
+                                    <GradientStop Color="#020617" Offset="1.0"/>
+                                </LinearGradientBrush>
+                            </Path.Stroke>
+                            <Path.Data>
+                                <PathGeometry>
+                                    <PathFigure StartPoint="-80,840">
+                                        <BezierSegment Point1="15,700" Point2="75,560" Point3="135,410"/>
+                                    </PathFigure>
+                                </PathGeometry>
+                            </Path.Data>
+                        </Path>
 
-                        <Path Stroke="#334155" StrokeThickness="14" StrokeStartLineCap="Round" StrokeEndLineCap="Round" 
-                              Data="M 70,435 L 130,165 L 190,435"/>
-                        <Line X1="85" Y1="365" X2="175" Y2="365" Stroke="#334155" StrokeThickness="7"/>
-
-                        <Border Canvas.Left="105" Canvas.Top="150" Width="50" Height="18" Background="#0F172A" CornerRadius="9" BorderBrush="#475569" BorderThickness="1">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <Rectangle Width="2" Height="10" Fill="#334155" Margin="2,0"/>
-                                <Rectangle Width="2" Height="10" Fill="#334155" Margin="2,0"/>
-                                <Rectangle Width="2" Height="10" Fill="#334155" Margin="2,0"/>
-                                <Rectangle Width="2" Height="10" Fill="#334155" Margin="2,0"/>
-                            </StackPanel>
+                        <!-- Аккуратный скругленный срез-манжета кабельной разделки -->
+                        <Border Canvas.Left="122" Canvas.Top="397" Width="26" Height="26" Background="#0F172A" CornerRadius="13" BorderBrush="#334155" BorderThickness="1.5">
+                            <Ellipse Width="16" Height="16" Fill="#020617" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
 
-                        <Ellipse Canvas.Left="35" Canvas.Top="215" Width="190" Height="190" Fill="#1E242E" Stroke="#0F172A" StrokeThickness="3"/>
+                        <!-- Активная измеряемая пара: Красная жила -->
+                        <Path Stroke="#DC2626" StrokeThickness="5" StrokeStartLineCap="Round"
+                              Data="M 135,410 C 150,300 175,185 250,170"/>
+                        <Path Stroke="#B45309" StrokeThickness="3" StrokeEndLineCap="Round"
+                              Data="M 250,170 L 274,170"/>
 
-                        <Ellipse Canvas.Left="45" Canvas.Top="225" Width="170" Height="170">
-                            <Ellipse.Fill>
-                                <RadialGradientBrush Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
-                                    <GradientStop Color="#78350F" Offset="0.0"/>
-                                    <GradientStop Color="#451A03" Offset="1.0"/>
-                                </RadialGradientBrush>
-                            </Ellipse.Fill>
-                        </Ellipse>
+                        <!-- Активная измеряемая пара: Синяя жила -->
+                        <Path Stroke="#2563EB" StrokeThickness="5" StrokeStartLineCap="Round"
+                              Data="M 135,410 C 150,335 180,245 250,241"/>
+                        <Path Stroke="#B45309" StrokeThickness="3" StrokeEndLineCap="Round"
+                              Data="M 250,241 L 274,241"/>
 
-                        <Ellipse Canvas.Left="45" Canvas.Top="225" Width="170" Height="170" Stroke="#B45309" StrokeThickness="12"/>
-                        <Ellipse Canvas.Left="45" Canvas.Top="225" Width="170" Height="170" Stroke="#F59E0B" StrokeThickness="8"/>
-                        <Ellipse Canvas.Left="45" Canvas.Top="225" Width="170" Height="170" Stroke="#FDE047" StrokeThickness="2" Opacity="0.7"/>
+                        <!-- Группа 1 неиспользуемых жил (кучно, 5 штук) -->
+                        <Path Stroke="#16A34A" StrokeThickness="3.8" StrokeStartLineCap="Round" Data="M 135,410 C 170,360 210,300 270,285"/>
+                        <Path Stroke="#B45309" StrokeThickness="2.2" StrokeEndLineCap="Round" Data="M 270,285 L 280,285"/>
 
-                        <Ellipse Canvas.Left="55" Canvas.Top="235" Width="150" Height="150" Stroke="#B45309" StrokeThickness="10"/>
-                        <Ellipse Canvas.Left="55" Canvas.Top="235" Width="150" Height="150" Stroke="#D97706" StrokeThickness="6"/>
+                        <Path Stroke="#CA8A04" StrokeThickness="3.8" StrokeStartLineCap="Round" Data="M 135,410 C 172,364 212,307 270,292"/>
+                        <Path Stroke="#B45309" StrokeThickness="2.2" StrokeEndLineCap="Round" Data="M 270,292 L 280,292"/>
 
-                        <Ellipse Canvas.Left="65" Canvas.Top="245" Width="130" Height="130" Stroke="#92400E" StrokeThickness="8"/>
-                        <Ellipse Canvas.Left="65" Canvas.Top="245" Width="130" Height="130" Stroke="#B45309" StrokeThickness="4"/>
+                        <Path Stroke="#EA580C" StrokeThickness="3.8" StrokeStartLineCap="Round" Data="M 135,410 C 174,368 214,314 270,299"/>
+                        <Path Stroke="#B45309" StrokeThickness="2.2" StrokeEndLineCap="Round" Data="M 270,299 L 280,299"/>
 
-                        <Ellipse Canvas.Left="60" Canvas.Top="240" Width="140" Height="140" Fill="#28303E" Stroke="#1E242E" StrokeThickness="3"/>
+                        <Path Stroke="#9A3412" StrokeThickness="3.8" StrokeStartLineCap="Round" Data="M 135,410 C 176,372 216,321 270,306"/>
+                        <Path Stroke="#B45309" StrokeThickness="2.2" StrokeEndLineCap="Round" Data="M 270,306 L 280,306"/>
 
-                        <Ellipse Canvas.Left="78" Canvas.Top="262" Width="26" Height="26" Fill="#78350F" Stroke="#1E242E" StrokeThickness="2"/>
-                        <Ellipse Canvas.Left="156" Canvas.Top="262" Width="26" Height="26" Fill="#78350F" Stroke="#1E242E" StrokeThickness="2"/>
-                        <Ellipse Canvas.Left="117" Canvas.Top="328" Width="26" Height="26" Fill="#78350F" Stroke="#1E242E" StrokeThickness="2"/>
+                        <Path Stroke="#7C3AED" StrokeThickness="3.8" StrokeStartLineCap="Round" Data="M 135,410 C 178,376 218,328 270,313"/>
+                        <Path Stroke="#B45309" StrokeThickness="2.2" StrokeEndLineCap="Round" Data="M 270,313 L 280,313"/>
 
-                        <Ellipse Canvas.Left="110" Canvas.Top="290" Width="40" Height="40" Fill="#0F172A" Stroke="#64748B" StrokeThickness="2"/>
-                        <Ellipse Canvas.Left="122" Canvas.Top="302" Width="16" Height="16" Fill="#94A3B8"/>
+                        <!-- Группа 2 неиспользуемых жил (кучно, 5 штук) -->
+                        <Path Stroke="#E2E8F0" StrokeThickness="3.8" StrokeStartLineCap="Round" Data="M 135,410 C 170,395 210,345 265,340"/>
+                        <Path Stroke="#B45309" StrokeThickness="2.2" StrokeEndLineCap="Round" Data="M 265,340 L 275,340"/>
 
-                        <Line X1="130" Y1="310" X2="165" Y2="330" Stroke="#475569" StrokeThickness="6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                        <Ellipse Canvas.Left="160" Canvas.Top="325" Width="12" Height="12" Fill="#E2E8F0" Stroke="#334155" StrokeThickness="1.5"/>
+                        <Path Stroke="#475569" StrokeThickness="3.8" StrokeStartLineCap="Round" Data="M 135,410 C 172,399 212,352 265,347"/>
+                        <Path Stroke="#B45309" StrokeThickness="2.2" StrokeEndLineCap="Round" Data="M 265,347 L 275,347"/>
+
+                        <Path Stroke="#0D9488" StrokeThickness="3.8" StrokeStartLineCap="Round" Data="M 135,410 C 174,403 214,359 265,354"/>
+                        <Path Stroke="#B45309" StrokeThickness="2.2" StrokeEndLineCap="Round" Data="M 265,354 L 275,354"/>
+
+                        <Path Stroke="#DB2777" StrokeThickness="3.8" StrokeStartLineCap="Round" Data="M 135,410 C 176,407 216,366 265,361"/>
+                        <Path Stroke="#B45309" StrokeThickness="2.2" StrokeEndLineCap="Round" Data="M 265,361 L 275,361"/>
+
+                        <Path Stroke="#65A30D" StrokeThickness="3.8" StrokeStartLineCap="Round" Data="M 135,410 C 178,411 218,373 265,368"/>
+                        <Path Stroke="#B45309" StrokeThickness="2.2" StrokeEndLineCap="Round" Data="M 265,368 L 275,368"/>
+
+                        <!-- Зажим-крокодил КРАСНЫЙ (зубцы точно охватывают медную жилу на Y=170) -->
+                        <Canvas x:Name="CrocodileRed" Canvas.Left="255" Canvas.Top="149" Width="120" Height="42">
+                            <Path Fill="#CBD5E1" Stroke="#475569" StrokeThickness="1.2"
+                                  Data="M 6,19 L 14,19 L 16,16 L 20,19 L 22,16 L 26,19 L 32,19 L 34,13 L 20,12 L 6,16 Z"/>
+                            <Path Fill="#94A3B8" Stroke="#475569" StrokeThickness="1.2"
+                                  Data="M 6,23 L 14,23 L 16,26 L 20,23 L 22,26 L 26,23 L 32,23 L 34,29 L 20,30 L 6,26 Z"/>
+                            <Ellipse Canvas.Left="24" Canvas.Top="18" Width="6" Height="6" Fill="#94A3B8" Stroke="#334155" StrokeThickness="1"/>
+
+                            <Path Stroke="#7F1D1D" StrokeThickness="1.5">
+                                <Path.Fill>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="#FF8A80" Offset="0.0"/>
+                                        <GradientStop Color="#EF4444" Offset="0.18"/>
+                                        <GradientStop Color="#DC2626" Offset="0.55"/>
+                                        <GradientStop Color="#991B1B" Offset="0.9"/>
+                                        <GradientStop Color="#7F1D1D" Offset="1.0"/>
+                                    </LinearGradientBrush>
+                                </Path.Fill>
+                                <Path.Data>
+                                    <PathGeometry>
+                                        <PathFigure StartPoint="30,12" IsClosed="True">
+                                            <BezierSegment Point1="40,8" Point2="55,6" Point3="75,7"/>
+                                            <BezierSegment Point1="90,8" Point2="102,12" Point3="112,17"/>
+                                            <LineSegment Point="120,17"/>
+                                            <LineSegment Point="120,25"/>
+                                            <LineSegment Point="112,25"/>
+                                            <BezierSegment Point1="102,30" Point2="90,34" Point3="75,35"/>
+                                            <BezierSegment Point1="55,36" Point2="40,34" Point3="30,30"/>
+                                        </PathFigure>
+                                    </PathGeometry>
+                                </Path.Data>
+                            </Path>
+
+                            <Path Stroke="#FFFFFF" StrokeThickness="1.8" Opacity="0.4" StrokeStartLineCap="Round"
+                                  Data="M 38,10 C 50,8 70,8 90,11 C 102,13 108,16 112,17"/>
+                            <Path Stroke="#000000" StrokeThickness="1" Opacity="0.25"
+                                  Data="M 68,8 L 68,14 M 74,8 L 74,14 M 80,8.5 L 80,14.5"/>
+                        </Canvas>
+
+                        <!-- Зажим-крокодил ЧЕРНЫЙ (зубцы точно охватывают синюю жилу на Y=241) -->
+                        <Canvas x:Name="CrocodileBlack" Canvas.Left="255" Canvas.Top="220" Width="120" Height="42">
+                            <Path Fill="#CBD5E1" Stroke="#475569" StrokeThickness="1.2"
+                                  Data="M 6,19 L 14,19 L 16,16 L 20,19 L 22,16 L 26,19 L 32,19 L 34,13 L 20,12 L 6,16 Z"/>
+                            <Path Fill="#94A3B8" Stroke="#475569" StrokeThickness="1.2"
+                                  Data="M 6,23 L 14,23 L 16,26 L 20,23 L 22,26 L 26,23 L 32,23 L 34,29 L 20,30 L 6,26 Z"/>
+                            <Ellipse Canvas.Left="24" Canvas.Top="18" Width="6" Height="6" Fill="#94A3B8" Stroke="#334155" StrokeThickness="1"/>
+
+                            <Path Stroke="#020617" StrokeThickness="1.5">
+                                <Path.Fill>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="#94A3B8" Offset="0.0"/>
+                                        <GradientStop Color="#475569" Offset="0.18"/>
+                                        <GradientStop Color="#1E293B" Offset="0.55"/>
+                                        <GradientStop Color="#0F172A" Offset="0.9"/>
+                                        <GradientStop Color="#020617" Offset="1.0"/>
+                                    </LinearGradientBrush>
+                                </Path.Fill>
+                                <Path.Data>
+                                    <PathGeometry>
+                                        <PathFigure StartPoint="30,12" IsClosed="True">
+                                            <BezierSegment Point1="40,8" Point2="55,6" Point3="75,7"/>
+                                            <BezierSegment Point1="90,8" Point2="102,12" Point3="112,17"/>
+                                            <LineSegment Point="120,17"/>
+                                            <LineSegment Point="120,25"/>
+                                            <LineSegment Point="112,25"/>
+                                            <BezierSegment Point1="102,30" Point2="90,34" Point3="75,35"/>
+                                            <BezierSegment Point1="55,36" Point2="40,34" Point3="30,30"/>
+                                        </PathFigure>
+                                    </PathGeometry>
+                                </Path.Data>
+                            </Path>
+
+                            <Path Stroke="#FFFFFF" StrokeThickness="1.8" Opacity="0.35" StrokeStartLineCap="Round"
+                                  Data="M 38,10 C 50,8 70,8 90,11 C 102,13 108,16 112,17"/>
+                            <Path Stroke="#000000" StrokeThickness="1" Opacity="0.3"
+                                  Data="M 68,8 L 68,14 M 74,8 L 74,14 M 80,8.5 L 80,14.5"/>
+                        </Canvas>
+
+                        <!-- Провода от хвостовиков крокодилов к кабельному разветвителю -->
+                        <Path x:Name="CrocodileLeadRed" Stroke="#DC2626" StrokeThickness="5" StrokeStartLineCap="Round"
+                              Data="M 375,170 C 400,170 420,198 428,218"/>
+                        <Path x:Name="CrocodileLeadBlack" Stroke="#0F172A" StrokeThickness="5" StrokeStartLineCap="Round"
+                              Data="M 375,241 C 400,241 420,226 428,222"/>
+
+                        <!-- Муфта-разветвитель присоединительного кабеля -->
+                        <Border Canvas.Left="424" Canvas.Top="210" Width="12" Height="20" Background="#0F172A" CornerRadius="4" BorderBrush="#334155" BorderThickness="1"/>
                     </Canvas>
 
+                    <!-- Тень основного присоединительного кабеля -->
                     <Path Stroke="#111827" StrokeThickness="16" Opacity="0.25" Canvas.Left="0" Canvas.Top="10">
                         <Path.Data>
                             <PathGeometry>
-                                <PathFigure x:Name="CableShadowFigure" StartPoint="122, 364">
-                                    <BezierSegment x:Name="CableShadowBezier" Point1="268, 258" Point2="557, -20" Point3="557, 46" />
+                                <PathFigure x:Name="CableShadowFigure" StartPoint="460, 280">
+                                    <BezierSegment x:Name="CableShadowBezier" Point1="475, 230" Point2="557, -10" Point3="557, 46" />
+                                </PathFigure>
+                            </PathGeometry>
+                        </Path.Data>
+                        </Path>
+
+                    <!-- Контур основного кабеля: точно выходит из муфты-разветвителя на (460, 270) -->
+                    <Path Stroke="#111827" StrokeThickness="14" StrokeStartLineCap="Round" Canvas.Left="0" Canvas.Top="0">
+                        <Path.Data>
+                            <PathGeometry>
+                                <PathFigure x:Name="CableBorderFigure" StartPoint="460, 270">
+                                    <BezierSegment x:Name="CableBorderBezier" Point1="475, 220" Point2="557, -20" Point3="557, 36" />
                                 </PathFigure>
                             </PathGeometry>
                         </Path.Data>
                     </Path>
 
-                    <Path Stroke="#B45309" StrokeThickness="14" Canvas.Left="0" Canvas.Top="0">
+                    <!-- Тело основного кабеля (без разрывов и смещений в тень) -->
+                    <Path Stroke="#1E293B" StrokeThickness="10" StrokeStartLineCap="Round" Canvas.Left="0" Canvas.Top="0">
                         <Path.Data>
                             <PathGeometry>
-                                <PathFigure x:Name="CableBorderFigure" StartPoint="170, 502">
-                                    <ArcSegment Point="122, 354" Size="82,82" SweepDirection="Clockwise" IsLargeArc="False"/>
-                                    <BezierSegment x:Name="CableBorderBezier" Point1="268, 248" Point2="557, -30" Point3="557, 36" />
-                                </PathFigure>
-                            </PathGeometry>
-                        </Path.Data>
-                    </Path>
-
-                    <Path Stroke="#F59E0B" StrokeThickness="10" Canvas.Left="0" Canvas.Top="0">
-                        <Path.Data>
-                            <PathGeometry>
-                                <PathFigure x:Name="CableFigure" StartPoint="170, 502">
-                                    <ArcSegment Point="122, 354" Size="82,82" SweepDirection="Clockwise" IsLargeArc="False"/>
-                                    <BezierSegment x:Name="CableBezier" Point1="268, 248" Point2="557, -30" Point3="557, 36" />
+                                <PathFigure x:Name="CableFigure" StartPoint="460, 270">
+                                    <BezierSegment x:Name="CableBezier" Point1="475, 220" Point2="557, -20" Point3="557, 36" />
                                 </PathFigure>
                             </PathGeometry>
                         </Path.Data>
@@ -695,16 +805,24 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
+                    <!-- Невидимый контейнер для совместимости с полями в C# коде -->
+                    <Grid Visibility="Collapsed">
+                        <Button x:Name="BtnPair12"/>
+                        <Button x:Name="BtnPair1Gnd"/>
+                        <Button x:Name="BtnPair34"/>
+                        <TextBlock x:Name="TxtInfoPair"/>
+                    </Grid>
+
                     <StackPanel Grid.Row="0">
                         <TextBlock Text="ОБУЧАЮЩИЙ КУРС" Foreground="#60A5FA" FontWeight="Bold" FontSize="11" Margin="0,0,0,4"/>
                         <TextBlock x:Name="TxtStepHeader" Text="Этап 1 из 8" Foreground="#94A3B8" FontSize="13" Margin="0,0,0,4"/>
-                        <TextBlock x:Name="TxtStepTitle" Text="Назначение прибора и ТБ" Foreground="#FFFFFF" FontWeight="Bold" FontSize="17" TextWrapping="Wrap" Margin="0,0,0,12"/>
+                        <TextBlock x:Name="TxtStepTitle" Text="Подключение к жилам кабеля" Foreground="#FFFFFF" FontWeight="Bold" FontSize="17" TextWrapping="Wrap" Margin="0,0,0,12"/>
                         
                         <ProgressBar x:Name="StepProgress" Height="4" Value="12.5" Maximum="100" Background="#334155" Foreground="#3B82F6" BorderThickness="0" Margin="0,0,0,14"/>
 
                         <Border Background="#1E232D" CornerRadius="8" Padding="10" BorderBrush="#333A48" BorderThickness="1" Margin="0,0,0,10">
                             <StackPanel>
-                                <TextBlock Text="ТОЧКА ПОДКЛЮЧЕНИЯ КАБЕЛЯ" Foreground="#94A3B8" FontWeight="Bold" FontSize="9.5" Margin="0,0,0,8"/>
+                                <TextBlock Text="ТОЧКА ПОДКЛЮЧЕНИЯ КАБЕЛЯ К ПРИБОРУ" Foreground="#94A3B8" FontWeight="Bold" FontSize="9.5" Margin="0,0,0,8"/>
                                 <UniformGrid Columns="3">
                                     <Button x:Name="BtnPort1" Content="ВХОД 1" Click="OnSelectPort1Clicked" Style="{StaticResource NavButton}" Padding="4,6" FontSize="10.5" Margin="0,0,3,0"/>
                                     <Button x:Name="BtnPort2" Content="ВХОД 2" Click="OnSelectPort2Clicked" Style="{StaticResource SecondaryNavButton}" Padding="4,6" FontSize="10.5" Margin="2,0,2,0"/>
@@ -808,8 +926,8 @@
                                         </Setter>
                                     </Style>
                                 </ListBox.ItemContainerStyle>
-                                <ListBoxItem Content="1. Назначение прибора и ТБ"/>
-                                <ListBoxItem Content="2. Подключение кабельной линии"/>
+                                <ListBoxItem Content="1. Подключение к жилам кабеля"/>
+                                <ListBoxItem Content="2. Подключение к рефлектометру"/>
                                 <ListBoxItem Content="3. Включение и калибровка шкалы"/>
                                 <ListBoxItem Content="4. Настройка координатной сетки"/>
                                 <ListBoxItem Content="5. Библиотека кабелей и выбор КУ"/>
@@ -833,7 +951,6 @@
             </Border>
         </Grid>
 
-        <!-- Диалоговое модальное окно «О программе» -->
         <Grid x:Name="AboutModal" Grid.RowSpan="2" Background="#A00F172A" Visibility="Collapsed" Panel.ZIndex="100">
             <Border Width="560" HorizontalAlignment="Center" VerticalAlignment="Center" 
                     Background="#1E242F" BorderBrush="#38BDF8" BorderThickness="1.5" CornerRadius="12" Padding="28">
