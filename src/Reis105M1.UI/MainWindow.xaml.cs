@@ -35,6 +35,7 @@ public partial class MainWindow : Window
 
     private int _currentStepIndex = 0;
     private int _selectedPort = 1;
+    private int _connectedPairMode = 1;
 
     private SoundPlayer? _clickSoundPlayer;
 
@@ -60,15 +61,15 @@ public partial class MainWindow : Window
         _steps = new List<TutorialStep>
         {
             new TutorialStep(
-                "Назначение прибора и ТБ",
+                "Подключение к жилам кабеля",
                 MeasurementRange.Range100m,
                 1.500,
                 0.0,
-                50.0,
-                new List<CableDefect>()
+                70.0,
+                new List<CableDefect> { new CableDefect(70.0, DefectType.OpenCircuit, 0.9) }
             ),
             new TutorialStep(
-                "Подключение кабельной линии",
+                "Подключение к рефлектометру",
                 MeasurementRange.Range100m,
                 1.500,
                 0.0,
@@ -241,6 +242,7 @@ public partial class MainWindow : Window
 
         LcdImage.Source = _lcdBuffer.Bitmap;
         StepsListBox.SelectedIndex = 0;
+        SetCrocodilePair(1);
         ApplyStep(0);
     }
 
@@ -430,13 +432,13 @@ public partial class MainWindow : Window
 
         return stepIndex switch
         {
-            0 => "РЕЙС-105М1 — цифровой импульсный рефлектометр для определения расстояний до повреждений и неоднородностей линий связи и силовых кабелей. Золотое правило безопасности: все измерения проводятся строго на отключенной линии с обеих сторон, жилы предварительно разряжаются на заземляющее устройство!",
+            0 => "Магистральный бронированный кабель (100 м) уходит в подземный кабельный коллектор. На разделке муфты выведен пучок цветных жил. Зажимами 'крокодил' оператор подключается к исследуемой паре: красный зажим на сигнальную жилу, черный — на вторую жилу или заземленную броню кабеля.",
             1 => port == 0 
-                ? "Кабель отключен от прибора. Выберите ВХОД 1 или ВХОД 2 в блоке подключения, чтобы направить зондирующий импульс в соответствующий канал."
+                ? "Присоединительный кабель отключен от рефлектометра. Выберите ВХОД 1 или ВХОД 2, чтобы соединить линию со схемой прибора."
                 : port == 2
-                    ? "Присоединительный кабель подключен к разъему ВХОД 2 на верхнем торце. Прибор проводит одиночные измерения через ВХОД 2 с той же точностью, что и через ВХОД 1 — схема входов полностью равнозначна. Разделение на два входа служит для режимов 'Сравнение', 'Разность' и 'Раздельный'."
-                    : "Присоединительный кабель подключен к разъему ВХОД 1 на верхнем торце. Сигнал от катушки поступает в первый измерительный тракт. Вы также можете переключить провод на ВХОД 2 — для одиночного поиска обрыва или КЗ оба входа работают идентично.",
-            2 => $"При нажатии кнопки питания прибор проводит внутреннюю автокалибровку. На монохромном ЖК-дисплее 128x64 формируется координатная сетка и линия нуля. Отраженный сигнал от измерительной катушки принимается трактом {portName}.",
+                    ? "Присоединительный кабель BNC-разъемом подключен к гнезду ВХОД 2 на верхнем торце. Прибор проводит одиночные измерения через ВХОД 2 с той же точностью, что и через ВХОД 1 — оба входа схемотехнически равнозначны."
+                    : "Присоединительный кабель подключен к разъему ВХОД 1 на верхнем торце. Сигнал от выбранных жил поступает в первый измерительный тракт рефлектометра.",
+            2 => $"При нажатии кнопки питания прибор проводит внутреннюю автокалибровку. На монохромном ЖК-дисплее 128x64 формируется координатная сетка и линия нуля. Отраженный сигнал от исследуемой кабельной пары принимается трактом {portName}.",
             3 => $"Координатная сетка дисплея для канала {portName} переключается кнопкой '⊞ Сетка' между 3 режимами: 1) Засечки (быстрая визуальная шкала делений через каждые 16 пикселей); 2) Клетки (полная сетка 8х4 для измерения амплитуды в вольтах); 3) Без сетки (чистый экран для поиска мелких дефектов без визуальных помех).",
             4 => $"Для точного вычисления дистанции по каналу {portName} необходимо установить коэффициент укорочения (КУ). В приборе есть энергонезависимая память до 64 типов линий. Кликните '📚 Кабели' чтобы открыть встроенную библиотеку марок (РК-50, РК-75, ФКБ, воздушные линии) и посмотреть их значения.",
             5 => $"Скорость электромагнитной волны в кабеле зависит от материала изоляции (V = c / γ). Для радиочастотных кабелей и связи коэффициент укорочения равен γ ≈ 1.500. Диапазон развертки для канала {portName} подбирается так, чтобы отраженный сигнал от конца линии полностью помещался на экране.",
@@ -444,6 +446,67 @@ public partial class MainWindow : Window
             7 => $"При коротком замыкании между жилами или жилы на броню отраженный импульс меняет полярность на противоположную (направлен строго вниз). На канале {portName} курсор 1 наводится на начало перегиба импульса КЗ, и оператор получает точную дистанцию L = 42.5 м до аварийного участка.",
             _ => string.Empty
         };
+    }
+
+    private void SetCrocodilePair(int mode)
+    {
+        _connectedPairMode = mode;
+
+        double redY = 150;
+        double blackY = 220;
+        string leadRedData = "M 355,171 C 390,171 415,200 430,215";
+        string leadBlackData = "M 355,241 C 390,241 415,230 430,225";
+
+        var btnActive = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2563EB"));
+        var btnNormal = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#475569"));
+
+        if (mode == 1)
+        {
+            redY = 150;
+            blackY = 220;
+            leadRedData = "M 355,171 C 390,171 415,200 430,215";
+            leadBlackData = "M 355,241 C 390,241 415,230 430,225";
+            TxtInfoPair.Text = "Жила 1 - Жила 2";
+            BtnPair12.Background = btnActive;
+            BtnPair1Gnd.Background = btnNormal;
+            BtnPair34.Background = btnNormal;
+        }
+        else if (mode == 2)
+        {
+            redY = 150;
+            blackY = 460;
+            leadRedData = "M 355,171 C 390,171 415,200 430,215";
+            leadBlackData = "M 355,481 C 410,481 425,250 430,225";
+            TxtInfoPair.Text = "Жила 1 - Броня";
+            BtnPair12.Background = btnNormal;
+            BtnPair1Gnd.Background = btnActive;
+            BtnPair34.Background = btnNormal;
+        }
+        else if (mode == 3)
+        {
+            redY = 289;
+            blackY = 324;
+            leadRedData = "M 355,310 C 390,310 415,215 430,215";
+            leadBlackData = "M 355,345 C 390,345 415,230 430,225";
+            TxtInfoPair.Text = "Жила 3 - Жила 4";
+            BtnPair12.Background = btnNormal;
+            BtnPair1Gnd.Background = btnNormal;
+            BtnPair34.Background = btnActive;
+        }
+
+        var duration = TimeSpan.FromMilliseconds(300);
+        var ease = new QuadraticEase { EasingMode = EasingMode.EaseInOut };
+
+        var animRed = new DoubleAnimation(redY, duration) { EasingFunction = ease };
+        var animBlack = new DoubleAnimation(blackY, duration) { EasingFunction = ease };
+
+        CrocodileRed.BeginAnimation(Canvas.TopProperty, animRed);
+        CrocodileBlack.BeginAnimation(Canvas.TopProperty, animBlack);
+
+        CrocodileLeadRed.Data = Geometry.Parse(leadRedData);
+        CrocodileLeadBlack.Data = Geometry.Parse(leadBlackData);
+
+        RenderScreen();
     }
 
     private void ApplyStep(int index)
@@ -456,11 +519,7 @@ public partial class MainWindow : Window
         _currentStepIndex = index;
         var step = _steps[index];
 
-        var activePort = index == 0 ? 0 : (_selectedPort == 0 ? 1 : _selectedPort);
-        if (index > 0 && _selectedPort == 0)
-        {
-            _selectedPort = 1;
-        }
+        var activePort = (_selectedPort == 0 && index > 1) ? 1 : _selectedPort;
 
         if (index == 3)
         {
@@ -538,7 +597,7 @@ public partial class MainWindow : Window
                     _lcdBuffer.DrawText(_selectedPort == 2 ? "ВХОД 2" : "ВХОД 1", 64, 2);
                     _lcdBuffer.DrawBatteryIcon(112, 2);
 
-                    if (_selectedPort > 0 && _currentStepIndex > 0)
+                    if (_selectedPort > 0)
                     {
                         var trace = _engine.GenerateTrace(_state, _currentDefects, samplesCount: 128);
                         _lcdBuffer.DrawTrace(trace, baselineY: 34, scale: 20.0);
@@ -609,11 +668,11 @@ public partial class MainWindow : Window
         CablePlug.BeginAnimation(Canvas.TopProperty, animY);
 
         var p2X = port == 2 ? 663.0 : 557.0;
-        var p1X = port == 2 ? 310.0 : 268.0;
+        var p1X = port == 2 ? 490.0 : 475.0;
 
         var animCableP3 = new PointAnimation(new Point(endX, targetY), duration) { EasingFunction = ease };
         var animCableP2 = new PointAnimation(new Point(p2X, targetY - 66), duration) { EasingFunction = ease };
-        var animCableP1 = new PointAnimation(new Point(p1X, 248), duration) { EasingFunction = ease };
+        var animCableP1 = new PointAnimation(new Point(p1X, 220), duration) { EasingFunction = ease };
 
         var animShadowP3 = new PointAnimation(new Point(endX, targetY + 10), duration) { EasingFunction = ease };
         var animShadowP2 = new PointAnimation(new Point(p2X, targetY - 56), duration) { EasingFunction = ease };
@@ -632,6 +691,21 @@ public partial class MainWindow : Window
         TxtStepDescription.Text = GetStepDescription(_currentStepIndex, _selectedPort);
 
         RenderScreen();
+    }
+
+    private void OnSelectPair12Clicked(object sender, RoutedEventArgs e)
+    {
+        SetCrocodilePair(1);
+    }
+
+    private void OnSelectPair1GndClicked(object sender, RoutedEventArgs e)
+    {
+        SetCrocodilePair(2);
+    }
+
+    private void OnSelectPair34Clicked(object sender, RoutedEventArgs e)
+    {
+        SetCrocodilePair(3);
     }
 
     private void OnScreenTraceClicked(object sender, RoutedEventArgs e)
