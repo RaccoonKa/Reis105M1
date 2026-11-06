@@ -216,9 +216,7 @@
                         </Rectangle.Effect>
                     </Rectangle>
 
-                    <!-- Магистральный кабель, разделка жил и зажимы-крокодилы -->
                     <Canvas Canvas.Left="30" Canvas.Top="50" Width="420" Height="730">
-                        <!-- Тень магистрального кабеля -->
                         <Path Stroke="#0B0F17" StrokeThickness="66" StrokeStartLineCap="Flat" Opacity="0.45"
                               Data="M -80,840 C 15,700 75,560 135,410">
                             <Path.Effect>
@@ -226,7 +224,6 @@
                             </Path.Effect>
                         </Path>
 
-                        <!-- Внешняя защитная оболочка магистрального кабеля с гладким скругленным торцом -->
                         <Path StrokeThickness="46" StrokeStartLineCap="Flat" StrokeEndLineCap="Round">
                             <Path.Stroke>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
@@ -246,24 +243,20 @@
                             </Path.Data>
                         </Path>
 
-                        <!-- Аккуратный скругленный срез-манжета кабельной разделки -->
                         <Border Canvas.Left="122" Canvas.Top="397" Width="26" Height="26" Background="#0F172A" CornerRadius="13" BorderBrush="#334155" BorderThickness="1.5">
                             <Ellipse Width="16" Height="16" Fill="#020617" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
 
-                        <!-- Активная измеряемая пара: Красная жила -->
                         <Path Stroke="#DC2626" StrokeThickness="5" StrokeStartLineCap="Round"
                               Data="M 135,410 C 150,300 175,185 250,170"/>
                         <Path Stroke="#B45309" StrokeThickness="3" StrokeEndLineCap="Round"
                               Data="M 250,170 L 274,170"/>
 
-                        <!-- Активная измеряемая пара: Синяя жила -->
                         <Path Stroke="#2563EB" StrokeThickness="5" StrokeStartLineCap="Round"
                               Data="M 135,410 C 150,335 180,245 250,241"/>
                         <Path Stroke="#B45309" StrokeThickness="3" StrokeEndLineCap="Round"
                               Data="M 250,241 L 274,241"/>
 
-                        <!-- Группа 1 неиспользуемых жил (кучно, 5 штук) -->
                         <Path Stroke="#16A34A" StrokeThickness="3.8" StrokeStartLineCap="Round" Data="M 135,410 C 170,360 210,300 270,285"/>
                         <Path Stroke="#B45309" StrokeThickness="2.2" StrokeEndLineCap="Round" Data="M 270,285 L 280,285"/>
 
@@ -279,7 +272,6 @@
                         <Path Stroke="#7C3AED" StrokeThickness="3.8" StrokeStartLineCap="Round" Data="M 135,410 C 178,376 218,328 270,313"/>
                         <Path Stroke="#B45309" StrokeThickness="2.2" StrokeEndLineCap="Round" Data="M 270,313 L 280,313"/>
 
-                        <!-- Группа 2 неиспользуемых жил (кучно, 5 штук) -->
                         <Path Stroke="#E2E8F0" StrokeThickness="3.8" StrokeStartLineCap="Round" Data="M 135,410 C 170,395 210,345 265,340"/>
                         <Path Stroke="#B45309" StrokeThickness="2.2" StrokeEndLineCap="Round" Data="M 265,340 L 275,340"/>
 
@@ -295,8 +287,7 @@
                         <Path Stroke="#65A30D" StrokeThickness="3.8" StrokeStartLineCap="Round" Data="M 135,410 C 178,411 218,373 265,368"/>
                         <Path Stroke="#B45309" StrokeThickness="2.2" StrokeEndLineCap="Round" Data="M 265,368 L 275,368"/>
 
-                        <!-- Зажим-крокодил КРАСНЫЙ (зубцы точно охватывают медную жилу на Y=170) -->
-                        <Canvas x:Name="CrocodileRed" Canvas.Left="255" Canvas.Top="149" Width="120" Height="42">
+                        <Canvas x:Name="CrocodileRed" Canvas.Left="330" Canvas.Top="230" Width="120" Height="42">
                             <Path Fill="#CBD5E1" Stroke="#475569" StrokeThickness="1.2"
                                   Data="M 6,19 L 14,19 L 16,16 L 20,19 L 22,16 L 26,19 L 32,19 L 34,13 L 20,12 L 6,16 Z"/>
                             <Path Fill="#94A3B8" Stroke="#475569" StrokeThickness="1.2"
@@ -334,8 +325,7 @@
                                   Data="M 68,8 L 68,14 M 74,8 L 74,14 M 80,8.5 L 80,14.5"/>
                         </Canvas>
 
-                        <!-- Зажим-крокодил ЧЕРНЫЙ (зубцы точно охватывают синюю жилу на Y=241) -->
-                        <Canvas x:Name="CrocodileBlack" Canvas.Left="255" Canvas.Top="220" Width="120" Height="42">
+                        <Canvas x:Name="CrocodileBlack" Canvas.Left="330" Canvas.Top="285" Width="120" Height="42">
                             <Path Fill="#CBD5E1" Stroke="#475569" StrokeThickness="1.2"
                                   Data="M 6,19 L 14,19 L 16,16 L 20,19 L 22,16 L 26,19 L 32,19 L 34,13 L 20,12 L 6,16 Z"/>
                             <Path Fill="#94A3B8" Stroke="#475569" StrokeThickness="1.2"
@@ -373,43 +363,53 @@
                                   Data="M 68,8 L 68,14 M 74,8 L 74,14 M 80,8.5 L 80,14.5"/>
                         </Canvas>
 
-                        <!-- Провода от хвостовиков крокодилов к кабельному разветвителю -->
-                        <Path x:Name="CrocodileLeadRed" Stroke="#DC2626" StrokeThickness="5" StrokeStartLineCap="Round"
-                              Data="M 375,170 C 400,170 420,198 428,218"/>
-                        <Path x:Name="CrocodileLeadBlack" Stroke="#0F172A" StrokeThickness="5" StrokeStartLineCap="Round"
-                              Data="M 375,241 C 400,241 420,226 428,222"/>
+                        <Path Stroke="#DC2626" StrokeThickness="5" StrokeStartLineCap="Round">
+                            <Path.Data>
+                                <PathGeometry>
+                                    <PathFigure x:Name="CrocodileLeadRedFigure" StartPoint="450,250">
+                                        <BezierSegment x:Name="CrocodileLeadRedBezier" Point1="440,250" Point2="435,225" Point3="428,220"/>
+                                    </PathFigure>
+                                </PathGeometry>
+                            </Path.Data>
+                        </Path>
 
-                        <!-- Муфта-разветвитель присоединительного кабеля -->
-                        <Border Canvas.Left="424" Canvas.Top="210" Width="12" Height="20" Background="#0F172A" CornerRadius="4" BorderBrush="#334155" BorderThickness="1"/>
+                        <Path Stroke="#0F172A" StrokeThickness="5" StrokeStartLineCap="Round">
+                            <Path.Data>
+                                <PathGeometry>
+                                    <PathFigure x:Name="CrocodileLeadBlackFigure" StartPoint="450,305">
+                                        <BezierSegment x:Name="CrocodileLeadBlackBezier" Point1="440,305" Point2="435,230" Point3="428,220"/>
+                                    </PathFigure>
+                                </PathGeometry>
+                            </Path.Data>
+                        </Path>
+
+                        <Border Canvas.Left="422" Canvas.Top="211" Width="14" Height="18" Background="#0F172A" CornerRadius="4" BorderBrush="#334155" BorderThickness="1"/>
                     </Canvas>
 
-                    <!-- Тень основного присоединительного кабеля -->
                     <Path Stroke="#111827" StrokeThickness="16" Opacity="0.25" Canvas.Left="0" Canvas.Top="10">
                         <Path.Data>
                             <PathGeometry>
-                                <PathFigure x:Name="CableShadowFigure" StartPoint="460, 280">
+                                <PathFigure x:Name="CableShadowFigure" StartPoint="458, 280">
                                     <BezierSegment x:Name="CableShadowBezier" Point1="475, 230" Point2="557, -10" Point3="557, 46" />
                                 </PathFigure>
                             </PathGeometry>
                         </Path.Data>
-                        </Path>
+                    </Path>
 
-                    <!-- Контур основного кабеля: точно выходит из муфты-разветвителя на (460, 270) -->
                     <Path Stroke="#111827" StrokeThickness="14" StrokeStartLineCap="Round" Canvas.Left="0" Canvas.Top="0">
                         <Path.Data>
                             <PathGeometry>
-                                <PathFigure x:Name="CableBorderFigure" StartPoint="460, 270">
+                                <PathFigure x:Name="CableBorderFigure" StartPoint="458, 270">
                                     <BezierSegment x:Name="CableBorderBezier" Point1="475, 220" Point2="557, -20" Point3="557, 36" />
                                 </PathFigure>
                             </PathGeometry>
                         </Path.Data>
                     </Path>
 
-                    <!-- Тело основного кабеля (без разрывов и смещений в тень) -->
                     <Path Stroke="#1E293B" StrokeThickness="10" StrokeStartLineCap="Round" Canvas.Left="0" Canvas.Top="0">
                         <Path.Data>
                             <PathGeometry>
-                                <PathFigure x:Name="CableFigure" StartPoint="460, 270">
+                                <PathFigure x:Name="CableFigure" StartPoint="458, 270">
                                     <BezierSegment x:Name="CableBezier" Point1="475, 220" Point2="557, -20" Point3="557, 36" />
                                 </PathFigure>
                             </PathGeometry>
@@ -805,43 +805,20 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Невидимый контейнер для совместимости с полями в C# коде -->
-                    <Grid Visibility="Collapsed">
-                        <Button x:Name="BtnPair12"/>
-                        <Button x:Name="BtnPair1Gnd"/>
-                        <Button x:Name="BtnPair34"/>
-                        <TextBlock x:Name="TxtInfoPair"/>
-                    </Grid>
-
                     <StackPanel Grid.Row="0">
                         <TextBlock Text="ОБУЧАЮЩИЙ КУРС" Foreground="#60A5FA" FontWeight="Bold" FontSize="11" Margin="0,0,0,4"/>
                         <TextBlock x:Name="TxtStepHeader" Text="Этап 1 из 8" Foreground="#94A3B8" FontSize="13" Margin="0,0,0,4"/>
-                        <TextBlock x:Name="TxtStepTitle" Text="Подключение к жилам кабеля" Foreground="#FFFFFF" FontWeight="Bold" FontSize="17" TextWrapping="Wrap" Margin="0,0,0,12"/>
+                        <TextBlock x:Name="TxtStepTitle" Text="Назначение прибора и подготовка" Foreground="#FFFFFF" FontWeight="Bold" FontSize="17" TextWrapping="Wrap" Margin="0,0,0,12"/>
                         
                         <ProgressBar x:Name="StepProgress" Height="4" Value="12.5" Maximum="100" Background="#334155" Foreground="#3B82F6" BorderThickness="0" Margin="0,0,0,14"/>
 
-                        <Border Background="#1E232D" CornerRadius="8" Padding="10" BorderBrush="#333A48" BorderThickness="1" Margin="0,0,0,10">
+                        <Border Background="#1E232D" CornerRadius="8" Padding="10" BorderBrush="#333A48" BorderThickness="1" Margin="0,0,0,14">
                             <StackPanel>
                                 <TextBlock Text="ТОЧКА ПОДКЛЮЧЕНИЯ КАБЕЛЯ К ПРИБОРУ" Foreground="#94A3B8" FontWeight="Bold" FontSize="9.5" Margin="0,0,0,8"/>
                                 <UniformGrid Columns="3">
                                     <Button x:Name="BtnPort1" Content="ВХОД 1" Click="OnSelectPort1Clicked" Style="{StaticResource NavButton}" Padding="4,6" FontSize="10.5" Margin="0,0,3,0"/>
                                     <Button x:Name="BtnPort2" Content="ВХОД 2" Click="OnSelectPort2Clicked" Style="{StaticResource SecondaryNavButton}" Padding="4,6" FontSize="10.5" Margin="2,0,2,0"/>
                                     <Button x:Name="BtnUnplug" Content="Отключить" Click="OnUnplugClicked" Style="{StaticResource SecondaryNavButton}" Padding="4,6" FontSize="10.5" Margin="3,0,0,0"/>
-                                </UniformGrid>
-                            </StackPanel>
-                        </Border>
-
-                        <Border Background="#1E232D" CornerRadius="8" Padding="10" BorderBrush="#333A48" BorderThickness="1" Margin="0,0,0,14">
-                            <StackPanel>
-                                <TextBlock Text="РЕЖИМ ЭКРАНА И СЕТКА ДИСПЛЕЯ" Foreground="#94A3B8" FontWeight="Bold" FontSize="9.5" Margin="0,0,0,8"/>
-                                <UniformGrid Columns="3" Margin="0,0,0,4">
-                                    <Button x:Name="BtnScreenTrace" Content="📈 РФГ" Click="OnScreenTraceClicked" Style="{StaticResource NavButton}" Padding="2,6" FontSize="10" Margin="0,0,2,0"/>
-                                    <Button x:Name="BtnGridToggle" Content="⊞ Сетка" Click="OnGridToggleClicked" Style="{StaticResource SecondaryNavButton}" Padding="2,6" FontSize="10" Margin="2,0,2,0"/>
-                                    <Button x:Name="BtnScreenMenu" Content="📋 Меню" Click="OnScreenMenuClicked" Style="{StaticResource SecondaryNavButton}" Padding="2,6" FontSize="10" Margin="2,0,0,0"/>
-                                </UniformGrid>
-                                <UniformGrid Columns="2">
-                                    <Button x:Name="BtnScreenCables" Content="📚 Кабели" Click="OnScreenCablesClicked" Style="{StaticResource SecondaryNavButton}" Padding="2,6" FontSize="10" Margin="0,0,2,0"/>
-                                    <Button x:Name="BtnScreenParams" Content="⚙ Параметры" Click="OnScreenParamsClicked" Style="{StaticResource SecondaryNavButton}" Padding="2,6" FontSize="10" Margin="2,0,0,0"/>
                                 </UniformGrid>
                             </StackPanel>
                         </Border>
@@ -873,6 +850,10 @@
                             <Border Background="#1E232D" CornerRadius="8" Padding="12" BorderBrush="#333A48" BorderThickness="1" Margin="0,0,0,14">
                                 <StackPanel>
                                     <TextBlock Text="ПАРАМЕТРЫ СИМУЛЯЦИИ" Foreground="#94A3B8" FontWeight="Bold" FontSize="9.5" Margin="0,0,0,8"/>
+                                    <Grid Margin="0,0,0,5">
+                                        <TextBlock Text="Зажимы линии:" Foreground="#64748B" FontSize="11.5"/>
+                                        <TextBlock x:Name="TxtInfoClips" Text="Отключены" Foreground="#F59E0B" FontWeight="Bold" FontSize="11.5" HorizontalAlignment="Right"/>
+                                    </Grid>
                                     <Grid Margin="0,0,0,5">
                                         <TextBlock Text="Активный разъем:" Foreground="#64748B" FontSize="11.5"/>
                                         <TextBlock x:Name="TxtInfoPort" Text="ВХОД 1" Foreground="#38BDF8" FontWeight="Bold" FontSize="11.5" HorizontalAlignment="Right"/>
@@ -926,12 +907,12 @@
                                         </Setter>
                                     </Style>
                                 </ListBox.ItemContainerStyle>
-                                <ListBoxItem Content="1. Подключение к жилам кабеля"/>
-                                <ListBoxItem Content="2. Подключение к рефлектометру"/>
-                                <ListBoxItem Content="3. Включение и калибровка шкалы"/>
-                                <ListBoxItem Content="4. Настройка координатной сетки"/>
-                                <ListBoxItem Content="5. Библиотека кабелей и выбор КУ"/>
-                                <ListBoxItem Content="6. Настройка усиления и диапазона"/>
+                                <ListBoxItem Content="1. Назначение прибора и ТБ"/>
+                                <ListBoxItem Content="2. Подключение зажимов к жилам"/>
+                                <ListBoxItem Content="3. Подключение к рефлектометру"/>
+                                <ListBoxItem Content="4. Включение и калибровка шкалы"/>
+                                <ListBoxItem Content="5. Настройка координатной сетки"/>
+                                <ListBoxItem Content="6. Библиотека кабелей и выбор КУ"/>
                                 <ListBoxItem Content="7. Локализация обрыва жилы"/>
                                 <ListBoxItem Content="8. Локализация короткого замыкания (КЗ)"/>
                             </ListBox>
