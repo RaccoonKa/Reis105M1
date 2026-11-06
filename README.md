@@ -1,41 +1,44 @@
-# REIS-105M1 Digital Pulse Reflectometer Simulator
+# REIS-105M1 Digital Pulse Reflectometer — Interactive Overview & Feature Demonstration
 
 [![.NET 8.0](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20WPF-0078D6?logo=windows&logoColor=white)](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/)
 [![Tests](https://img.shields.io/badge/Tests-xUnit-blue)](https://xunit.net/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-An interactive virtual trainer and digital simulation of the portable pulse reflectometer (Time-Domain Reflectometer / TDR) **REIS-105M1**, built on **.NET 8 (WPF)**. The project includes a physical/mathematical cable line model, a 128x64 monochrome virtual LCD screen buffer, and an interactive 2D desktop scene with animated cable connections and smooth camera zoom.
+An interactive visual demonstration application showcasing the architecture, operational capabilities, front-panel controls, authentic menu systems, and measurement principles of the portable pulse reflectometer (Time-Domain Reflectometer / TDR) **REIS-105M1**, built on **.NET 8 (WPF)**.
 
 ---
 
 ## 📌 Repository Overview & Keywords
 
 > **Short Description (GitHub About):**
-> *Digital simulation and virtual trainer for the REIS-105M1 pulse reflectometer (TDR) built with .NET 8 (WPF), featuring realistic cable line physics, a 128x64 LCD raster engine, and interactive 2D animations.*
+> *Interactive software overview and visual demonstration of the REIS-105M1 pulse reflectometer (TDR), illustrating its operational modes, front-panel controls, 128x64 LCD telemetry, and cable reflectometry principles.*
 
 ### 🏷️ Topic Tags & Keywords
-`pulse-reflectometer` `tdr-simulator` `reis-105m1` `cable-fault-locator` `time-domain-reflectometry` `physics-simulation` `dotnet8` `wpf` `csharp12` `lcd-emulator` `writeablebitmap` `clean-architecture` `xunit`
+`reis-105m1` `pulse-reflectometer` `tdr-overview` `feature-demonstration` `cable-fault-locator` `time-domain-reflectometry` `dotnet8` `wpf` `csharp12` `lcd-emulator` `writeablebitmap` `sound-effects` `interactive-ui`
 
-### 🎯 Purpose & Applications
-- **Hands-on Education & Training:** Teaches telecommunication and electrical engineers how to operate pulse reflectometers without needing expensive lab equipment or damaged cables.
-- **Cable Fault Localization:** Simulates detection of open circuits ($k = +1$), short circuits ($k = -1$), and impedance mismatches with attenuation and noise.
-- **Accurate Physical Modeling:** Calculates distance via two-way propagation delay $L = \frac{v \cdot \Delta t}{2}$ with customizable velocity of propagation (VOP) / shortening factors.
+### 🎯 Scope & Objectives
+- **Device Capabilities Overview:** Demonstrates the functional features, measuring ranges ($12.5\,\text{m}$ to $25\,\text{km}$), velocity factor ($VOP$ / $\gamma$), digital gain adjustments (0–80 dB), zoom factors, and ergonomic layout of the REIS-105M1 instrument.
+- **Interactive Control Panel Exploration:** Complete interactive front panel with authentic push-buttons, navigation D-pad, power button dialog, memory management, backlight brightness toggling, and tactile click sound feedback.
+- **Realistic Menu & Dialog System:** Full emulation of device internal screens: Main Menu, Memory Allocation & Records, Cable Shortening Table, System Parameters, Battery Status, and Power-off Confirmation.
+- **Reflectometry Visualization:** Illustrates how TDR pulses propagate along transmission lines, demonstrating the visual signatures of common cable discontinuities (open circuits $k = +1$, short circuits $k = -1$, and impedance irregularities) with distance calculation based on two-way delay $L = \frac{v \cdot \Delta t}{2}$.
+- **Authentic Telemetry Display:** High-fidelity 128x64 monochrome LCD display layout with custom 5x7 bitmap raster fonts, dual measurement cursors, status lines, and on-screen diagnostics.
 
 ---
 
 ## 🏛️ Solution Architecture
 
-The solution adheres to clean architecture principles and is divided into modular, decoupled libraries:
+The solution is engineered with clean separation of concerns across focused modular components:
 
 ```
 Reis105M1/
+├── assets/                     # Graphical assets (app icons) and tactile audio samples (.wav)
 ├── src/
-│   ├── Reis105M1.Core/         # Domain models, TDR physics engine, finite state machine
-│   ├── Reis105M1.Display/      # 128x64 LCD raster buffer, graphic primitives, blitter
-│   └── Reis105M1.UI/           # WPF application, interactive device front panel, 2D animations
+│   ├── Reis105M1.Core/         # Domain state models, TDR simulation engine, finite state machine
+│   ├── Reis105M1.Display/      # 128x64 LCD raster buffer, 5x7 typography, primitives, bitmap blitter
+│   └── Reis105M1.UI/           # WPF presentation layer, interactive 2D scene, audio, animations
 ├── tests/
-│   └── Reis105M1.Core.Tests/   # Unit tests for delay calculations, trace synthesis, and FSM
+│   └── Reis105M1.Core.Tests/   # Unit tests for core formulas, trace synthesis, and FSM transitions
 ├── .editorconfig
 ├── .gitignore
 ├── README.md
@@ -45,22 +48,24 @@ Reis105M1/
 ### Module Breakdown
 
 1. **`Reis105M1.Core`** (`net8.0-windows`):
-   - `DeviceState`: Manages device power, active measurement range, velocity factor ($VOP$), digital gain (0–80 dB), and cursor positions.
-   - `ReflectometryEngine`: Synthesizes realistic TDR traces based on electromagnetic wave propagation, signal delays ($L = \frac{v \cdot \Delta t}{2}$), exponential cable attenuation, Gaussian noise, and boundary reflection coefficients for various defect types (open circuit, short circuit, impedance mismatches).
-   - `MenuStateMachine`: Implements a deterministic finite state machine (FSM) handling front-panel keypad inputs, mode switching, and parameter modifications.
+   - `DeviceState`: Encapsulates operational parameters including power status, measurement range ($12.5\,\text{m}$ to $25\,\text{km}$), velocity factor ($VOP$ / shortening factor), digital gain (0–80 dB), zoom factors, and measurement cursor positions.
+   - `ReflectometryEngine`: Synthesizes pulse response waveforms based on electromagnetic propagation, attenuation, and boundary reflection coefficients for demonstration purposes.
+   - `MenuStateMachine`: Provides a deterministic state machine managing front-panel button actions, navigation, and state transitions.
 
 2. **`Reis105M1.Display`** (`net8.0-windows`):
-   - Emulates the hardware 128x64 monochrome liquid crystal display (LCD) matrix.
-   - Provides efficient line drawing (Bresenham algorithm), dotted measurement cursors, coordinate grids, and direct fast memory copying into WPF `WriteableBitmap`.
+   - Emulates the hardware 128x64 monochrome liquid crystal display matrix with configurable backlight levels.
+   - Contains an embedded 5x7 pixel raster font engine for rendering real-time on-screen telemetry (range, gain, $VOP$, cursor coordinates, and $\Delta L$).
+   - Implements authentic screen modes: Trace view, Main Menu, Memory manager, Cable table, Parameters, Battery monitor, and Power-off dialog.
+   - Zero-allocation frame copying directly to WPF `WriteableBitmap`.
 
 3. **`Reis105M1.UI`** (`net8.0-windows` / WPF):
-   - Interactive 2D workbench scene hosting the virtual device enclosure, BNC connectors, and cable lines.
-   - Smooth 2D hardware connection animations using WPF Storyboards and `DoubleAnimation`.
-   - Cinematic zoom-in camera transitions to focus on the LCD and controls using `ScaleTransform` and `TranslateTransform`.
-   - Interactive push-button layer mapped to the physical device control panel.
+   - Rich interactive 2D workbench scene featuring an authentic high-resolution device front panel.
+   - Embedded tactile audio feedback on button clicks using integrated waveform audio.
+   - Smooth 2D cable connection animations (BNC connector mating) using WPF Storyboards.
+   - Viewport camera zoom transitions (`ScaleTransform`, `TranslateTransform`) for focused inspection of the screen and controls.
 
 4. **`Reis105M1.Core.Tests`** (`xUnit`):
-   - Verifies reciprocal delay-distance formulas, reflection pulse shapes, gain limits, and state transitions.
+   - Automated tests verifying signal velocity reciprocal calculations, defect distance resolution, trace point bounds, and state machine transitions.
 
 ---
 
@@ -68,7 +73,8 @@ Reis105M1/
 
 - **Platform:** .NET 8.0 (Windows Desktop / WPF)
 - **Language:** C# 12
-- **UI & Graphics:** WPF, XAML, Storyboard, WriteableBitmap
+- **UI & Graphics:** XAML, Storyboard, WriteableBitmap, Low-level pixel blitting
+- **Audio:** Embedded WAV playback for tactile button feedback
 - **Testing:** xUnit, .NET Test SDK
 
 ---
@@ -92,7 +98,7 @@ dotnet build
 # Run unit tests
 dotnet test
 
-# Launch the simulator
+# Launch the interactive overview application
 dotnet run --project src/Reis105M1.UI/Reis105M1.UI.csproj
 ```
 
@@ -100,8 +106,8 @@ dotnet run --project src/Reis105M1.UI/Reis105M1.UI.csproj
 
 ## 🌿 Branching Strategy (Git Flow)
 
-- `main` — Production-ready, stable releases.
-- `develop` — Active integration and staging branch.
-- `feature/core-simulation` — Enhancements for the mathematical TDR model and cable physics.
-- `feature/display-renderer` — LCD screen emulation and bitmap rendering optimizations.
-- `feature/ui-animations` — Desk scene, BNC plug animations, and camera viewport transitions.
+- `main` — Production-ready, stable final release.
+- `develop` — Active development and integration branch.
+- `feature/core-simulation` — Enhancements for device models and TDR signal generation.
+- `feature/display-renderer` — LCD screen emulation, raster typography, and rendering optimizations.
+- `feature/ui-animations` — Desk scene, interactive controls, audio feedback, and camera animations.

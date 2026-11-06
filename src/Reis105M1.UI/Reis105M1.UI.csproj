@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    
+    <!-- Иконка для EXE в проводнике Windows -->
+    <ApplicationIcon Condition="Exists('..\..\assets\icon\reis_icon.ico')">..\..\assets\icon\reis_icon.ico</ApplicationIcon>
+    <ApplicationIcon Condition="!Exists('..\..\assets\icon\reis_icon.ico') and Exists('..\..\assets\icon\reis_icon.ico')">..\..\assets\icon\reis_icon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Reis105M1.Core\Reis105M1.Core.csproj" />
+    <ProjectReference Include="..\Reis105M1.Display\Reis105M1.Display.csproj" />
+  </ItemGroup>
+
+  <!-- Вшиваем все файлы из assets внутрь сборки для автономной работы на рабочем столе -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\assets\**\*.*">
+      <LogicalName>assets/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>
