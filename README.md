@@ -5,7 +5,7 @@
 [![Tests](https://img.shields.io/badge/Tests-xUnit-blue)](https://xunit.net/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-An interactive visual demonstration application showcasing the architecture, operational capabilities, front-panel controls, and measurement principles of the portable pulse reflectometer (Time-Domain Reflectometer / TDR) **REIS-105M1**, built on **.NET 8 (WPF)**.
+An interactive visual demonstration application showcasing the architecture, operational capabilities, front-panel controls, authentic menu systems, and measurement principles of the portable pulse reflectometer (Time-Domain Reflectometer / TDR) **REIS-105M1**, built on **.NET 8 (WPF)**.
 
 ---
 
@@ -18,10 +18,11 @@ An interactive visual demonstration application showcasing the architecture, ope
 `reis-105m1` `pulse-reflectometer` `tdr-overview` `feature-demonstration` `cable-fault-locator` `time-domain-reflectometry` `dotnet8` `wpf` `csharp12` `lcd-emulator` `writeablebitmap` `sound-effects` `interactive-ui`
 
 ### 🎯 Scope & Objectives
-- **Device Capabilities Overview:** Demonstrates the key functional features, measuring ranges, parameter adjustments, and ergonomics of the industrial REIS-105M1 instrument in a clear, interactive visual format.
-- **Interactive Control Panel Exploration:** Allows users to interact with all authentic push-buttons, navigation controls, and mode selectors with tactile sound feedback, visualizing how the real device responds to operator inputs.
+- **Device Capabilities Overview:** Demonstrates the functional features, measuring ranges ($12.5\,\text{m}$ to $25\,\text{km}$), velocity factor ($VOP$ / $\gamma$), digital gain adjustments (0–80 dB), zoom factors, and ergonomic layout of the REIS-105M1 instrument.
+- **Interactive Control Panel Exploration:** Complete interactive front panel with authentic push-buttons, navigation D-pad, power button dialog, memory management, backlight brightness toggling, and tactile click sound feedback.
+- **Realistic Menu & Dialog System:** Full emulation of device internal screens: Main Menu, Memory Allocation & Records, Cable Shortening Table, System Parameters, Battery Status, and Power-off Confirmation.
 - **Reflectometry Visualization:** Illustrates how TDR pulses propagate along transmission lines, demonstrating the visual signatures of common cable discontinuities (open circuits $k = +1$, short circuits $k = -1$, and impedance irregularities) with distance calculation based on two-way delay $L = \frac{v \cdot \Delta t}{2}$.
-- **Authentic Telemetry Display:** Showcases the real 128x64 monochrome LCD display layout, complete with custom bitmap raster fonts, dual measurement cursors, status lines, and on-screen diagnostics.
+- **Authentic Telemetry Display:** High-fidelity 128x64 monochrome LCD display layout with custom 5x7 bitmap raster fonts, dual measurement cursors, status lines, and on-screen diagnostics.
 
 ---
 
@@ -52,13 +53,14 @@ Reis105M1/
    - `MenuStateMachine`: Provides a deterministic state machine managing front-panel button actions, navigation, and state transitions.
 
 2. **`Reis105M1.Display`** (`net8.0-windows`):
-   - Emulates the hardware 128x64 monochrome liquid crystal display matrix.
+   - Emulates the hardware 128x64 monochrome liquid crystal display matrix with configurable backlight levels.
    - Contains an embedded 5x7 pixel raster font engine for rendering real-time on-screen telemetry (range, gain, $VOP$, cursor coordinates, and $\Delta L$).
-   - Implements efficient waveform plotting, coordinate grid generation, and zero-allocation frame copying directly to WPF `WriteableBitmap`.
+   - Implements authentic screen modes: Trace view, Main Menu, Memory manager, Cable table, Parameters, Battery monitor, and Power-off dialog.
+   - Zero-allocation frame copying directly to WPF `WriteableBitmap`.
 
 3. **`Reis105M1.UI`** (`net8.0-windows` / WPF):
    - Rich interactive 2D workbench scene featuring an authentic high-resolution device front panel.
-   - Tactile audio feedback on button clicks using integrated waveform audio.
+   - Embedded tactile audio feedback on button clicks using integrated waveform audio.
    - Smooth 2D cable connection animations (BNC connector mating) using WPF Storyboards.
    - Viewport camera zoom transitions (`ScaleTransform`, `TranslateTransform`) for focused inspection of the screen and controls.
 
@@ -72,7 +74,7 @@ Reis105M1/
 - **Platform:** .NET 8.0 (Windows Desktop / WPF)
 - **Language:** C# 12
 - **UI & Graphics:** XAML, Storyboard, WriteableBitmap, Low-level pixel blitting
-- **Audio:** System.Media / Embedded WAV playback for button feedback
+- **Audio:** Embedded WAV playback for tactile button feedback
 - **Testing:** xUnit, .NET Test SDK
 
 ---
@@ -104,8 +106,8 @@ dotnet run --project src/Reis105M1.UI/Reis105M1.UI.csproj
 
 ## 🌿 Branching Strategy (Git Flow)
 
-- `main` — Production-ready, stable releases.
-- `develop` — Active integration and staging branch.
+- `main` — Production-ready, stable final release.
+- `develop` — Active development and integration branch.
 - `feature/core-simulation` — Enhancements for device models and TDR signal generation.
 - `feature/display-renderer` — LCD screen emulation, raster typography, and rendering optimizations.
 - `feature/ui-animations` — Desk scene, interactive controls, audio feedback, and camera animations.

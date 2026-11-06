@@ -18,6 +18,8 @@ public enum LcdScreenMode
 {
     Trace,
     MainMenu,
+    Memory,
+    PowerConfirm,
     CableTable,
     Parameters,
     Battery
@@ -28,9 +30,17 @@ public class LcdDisplayBuffer
     public const int ScreenWidth = 128;
     public const int ScreenHeight = 64;
 
-    private const uint ColorBg = 0xFF8F9F58;
+    private static readonly uint[] BacklightColors =
+    {
+        0xFF8F9F58,
+        0xFFAEC566,
+        0xFF6C7C3E
+    };
+
     private const uint ColorFg = 0xFF14180E;
 
+    private int _backlightIndex = 0;
+    private uint _currentColorBg = BacklightColors[0];
     private readonly uint[] _pixelBuffer;
     private readonly WriteableBitmap _bitmap;
     private readonly Int32Rect _rect;
@@ -39,6 +49,8 @@ public class LcdDisplayBuffer
     public WriteableBitmap Bitmap => _bitmap;
     public LcdGridMode GridMode { get; set; } = LcdGridMode.Ticks;
     public LcdScreenMode ScreenMode { get; set; } = LcdScreenMode.Trace;
+    public int ActiveCursorIndex { get; set; } = 0;
+    public int BacklightLevel => _backlightIndex;
 
     private static readonly Dictionary<char, byte[]> Font5x7 = new()
     {
@@ -66,6 +78,8 @@ public class LcdDisplayBuffer
         [']'] = new byte[] { 0x0E, 0x02, 0x02, 0x02, 0x02, 0x02, 0x0E },
         ['?'] = new byte[] { 0x0E, 0x11, 0x01, 0x02, 0x04, 0x00, 0x04 },
         ['!'] = new byte[] { 0x04, 0x04, 0x04, 0x04, 0x04, 0x00, 0x04 },
+        ['<'] = new byte[] { 0x02, 0x04, 0x08, 0x10, 0x08, 0x04, 0x02 },
+        ['>'] = new byte[] { 0x08, 0x04, 0x02, 0x01, 0x02, 0x04, 0x08 },
         [' '] = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
         ['A'] = new byte[] { 0x0E, 0x11, 0x11, 0x1F, 0x11, 0x11, 0x11 },
         ['B'] = new byte[] { 0x1E, 0x11, 0x11, 0x1E, 0x11, 0x11, 0x1E },
@@ -125,7 +139,8 @@ public class LcdDisplayBuffer
         ['Ь'] = new byte[] { 0x10, 0x10, 0x1E, 0x11, 0x11, 0x1E, 0x00 },
         ['Э'] = new byte[] { 0x1E, 0x01, 0x01, 0x0F, 0x01, 0x01, 0x1E },
         ['Ю'] = new byte[] { 0x12, 0x15, 0x1D, 0x15, 0x15, 0x12, 0x00 },
-        ['Я'] = new byte[] { 0x0F, 0x11, 0x11, 0x0F, 0x05, 0x09, 0x11 }
+        ['Я'] = new byte[] { 0x0F, 0x11, 0x11, 0x0F, 0x05, 0x09, 0x11 },
+        ['γ'] = new byte[] { 0x11, 0x11, 0x0A, 0x04, 0x04, 0x08, 0x10 }
     };
 
     public LcdDisplayBuffer()
@@ -137,9 +152,26 @@ public class LcdDisplayBuffer
         Clear();
     }
 
+    public void CycleBacklight()
+    {
+        _backlightIndex = (_backlightIndex + 1) % BacklightColors.Length;
+        _currentColorBg = BacklightColors[_backlightIndex];
+    }
+
+    public void SetBacklightLevel(int level)
+    {
+        _backlightIndex = Math.Clamp(level, 0, BacklightColors.Length - 1);
+        _currentColorBg = BacklightColors[_backlightIndex];
+    }
+
     public void Clear()
     {
-        Array.Fill(_pixelBuffer, ColorBg);
+        Array.Fill(_pixelBuffer, _currentColorBg);
+    }
+
+    public void ClearDark()
+    {
+        Array.Fill(_pixelBuffer, 0xFF353A2A);
     }
 
     public void SetPixel(int x, int y, bool isBlack = true)
@@ -149,7 +181,7 @@ public class LcdDisplayBuffer
             return;
         }
 
-        _pixelBuffer[y * ScreenWidth + x] = isBlack ? ColorFg : ColorBg;
+        _pixelBuffer[y * ScreenWidth + x] = isBlack ? ColorFg : _currentColorBg;
     }
 
     public void SetPixelColor(int x, int y, uint color)
@@ -211,11 +243,11 @@ public class LcdDisplayBuffer
         }
 
         int curX = x;
-        uint charColor = invert ? ColorBg : ColorFg;
+        uint charColor = invert ? _currentColorBg : ColorFg;
 
         foreach (char rawChar in text)
         {
-            char c = char.ToUpperInvariant(rawChar);
+            char c = rawChar == 'γ' ? 'γ' : char.ToUpperInvariant(rawChar);
             if (c == 'Ё') c = 'Е';
 
             if (Font5x7.TryGetValue(c, out var glyph))
@@ -247,17 +279,17 @@ public class LcdDisplayBuffer
         {
             for (int x = 0; x < ScreenWidth; x += 2)
             {
-                SetPixel(x, 34, true);
+                SetPixel(x, 38, true);
             }
 
             for (int x = 0; x < ScreenWidth; x += 16)
             {
-                DrawVLine(x, 31, 37, true);
+                DrawVLine(x, 35, 41, true);
             }
         }
         else if (GridMode == LcdGridMode.FullGrid)
         {
-            for (int y = 14; y <= 50; y += 12)
+            for (int y = 14; y <= 48; y += 11)
             {
                 for (int x = 0; x < ScreenWidth; x += 2)
                 {
@@ -267,7 +299,7 @@ public class LcdDisplayBuffer
 
             for (int x = 0; x < ScreenWidth; x += 16)
             {
-                for (int y = 10; y <= 54; y += 2)
+                for (int y = 12; y <= 50; y += 2)
                 {
                     SetPixel(x, y, true);
                 }
@@ -275,20 +307,20 @@ public class LcdDisplayBuffer
         }
     }
 
-    public void DrawTrace(IReadOnlyList<double> samples, int baselineY = 34, double scale = 20.0)
+    public void DrawTrace(IReadOnlyList<double> samples, int baselineY = 38, double scale = 22.0)
     {
         if (samples == null || samples.Count == 0) return;
 
         double stepX = (double)(ScreenWidth - 1) / (samples.Count - 1);
         int prevX = 0;
         int prevY = baselineY - (int)Math.Round(samples[0] * scale);
-        prevY = Math.Clamp(prevY, 11, 52);
+        prevY = Math.Clamp(prevY, 13, 50);
 
         for (int i = 1; i < samples.Count; i++)
         {
             int currX = (int)Math.Round(i * stepX);
             int currY = baselineY - (int)Math.Round(samples[i] * scale);
-            currY = Math.Clamp(currY, 11, 52);
+            currY = Math.Clamp(currY, 13, 50);
 
             DrawLine(prevX, prevY, currX, currY);
 
@@ -301,7 +333,7 @@ public class LcdDisplayBuffer
     {
         x = Math.Clamp(x, 0, ScreenWidth - 1);
 
-        for (int y = 11; y <= 52; y++)
+        for (int y = 13; y <= 50; y++)
         {
             if (!isDotted || (y % 2 == 0))
             {
@@ -311,42 +343,133 @@ public class LcdDisplayBuffer
 
         if (isDotted)
         {
+            SetPixel(x, 12, true);
+            SetPixel(x - 1, 11, true);
+            SetPixel(x + 1, 11, true);
+            SetPixel(x - 2, 10, true);
+            SetPixel(x + 2, 10, true);
+        }
+        else
+        {
+            DrawHLine(x - 2, x + 2, 12, true);
+            DrawHLine(x - 1, x + 1, 11, true);
             SetPixel(x, 10, true);
-            SetPixel(x - 1, 9, true);
-            SetPixel(x + 1, 9, true);
-            SetPixel(x - 2, 8, true);
-            SetPixel(x + 2, 8, true);
         }
     }
 
     public void DrawBatteryIcon(int x, int y)
     {
-        DrawHLine(x, x + 10, y, true);
-        DrawHLine(x, x + 10, y + 6, true);
-        DrawVLine(x, y, y + 6, true);
-        DrawVLine(x + 10, y, y + 6, true);
-        DrawVLine(x + 11, y + 2, y + 4, true);
-        FillRect(x + 2, y + 2, 7, 3, ColorFg);
+        DrawHLine(x, x + 9, y, true);
+        DrawHLine(x, x + 9, y + 5, true);
+        DrawVLine(x, y, y + 5, true);
+        DrawVLine(x + 9, y, y + 5, true);
+        DrawVLine(x + 10, y + 1, y + 4, true);
+        FillRect(x + 2, y + 2, 6, 2, ColorFg);
+    }
+
+    public void DrawTraceHeader(string portText, double shortening)
+    {
+        DrawText(portText, 2, 2);
+        DrawText($"γ:{shortening:F3}", 68, 2);
+        DrawBatteryIcon(115, 2);
+    }
+
+    public void DrawTraceFooter(double distance, int activeCursor, double cursorPosition, string? badge)
+    {
+        string distStr = $"L={distance:F1}м";
+        DrawText(distStr, 2, 54);
+
+        if (!string.IsNullOrEmpty(badge))
+        {
+            int badgeX = Math.Max(46, (ScreenWidth - (badge.Length * 6)) / 2);
+            DrawText(badge, badgeX, 54, invert: true);
+        }
+        else
+        {
+            string curStr = $"[{activeCursor}={cursorPosition:F1}]";
+            DrawText(curStr, 46, 54, invert: true);
+        }
     }
 
     public void DrawMainMenuScreen(int selectedIndex = 0)
     {
         Clear();
-        DrawText("ГЛАВНОЕ МЕНЮ", 30, 2);
-        DrawHLine(0, ScreenWidth - 1, 11, true);
+        DrawText("  ГЛАВНОЕ МЕНЮ  ", 18, 2);
+        for (int x = 0; x < ScreenWidth; x += 2) SetPixel(x, 11, true);
 
         string[] leftItems = { "Нач.устан.", "Аккумулятор", "Укорочение", "Режим", "Усреднение" };
         string[] rightItems = { "КОМПЬЮТЕР", "Калибровка", "ИНФОРМАЦИЯ", "ПАРАМЕТРЫ", "Выход" };
 
         for (int i = 0; i < 5; i++)
         {
-            int y = 15 + (i * 9);
+            int y = 14 + (i * 10);
             bool isLeftSelected = (selectedIndex == i);
             bool isRightSelected = (selectedIndex == i + 5);
 
             DrawText(leftItems[i], 4, y, isLeftSelected);
             DrawText(rightItems[i], 66, y, isRightSelected);
         }
+    }
+
+    public void DrawMemoryScreen(int selectedIndex = 1, double freePercent = 98.8)
+    {
+        Clear();
+        DrawText($"СВОБОДНО ПАМЯТИ:{freePercent:F1}%", 4, 2);
+        for (int x = 0; x < ScreenWidth; x += 2) SetPixel(x, 11, true);
+
+        string[] items =
+        {
+            "Запись в память",
+            "Быстрая запись",
+            "Выход",
+            "Чтение из памяти",
+            "Удаление из памяти",
+            "Изменение имени"
+        };
+
+        for (int i = 0; i < items.Length; i++)
+        {
+            int y = 14 + (i * 8);
+            bool isSel = (i == selectedIndex);
+            DrawText(items[i], 8, y, isSel);
+        }
+    }
+
+    public void DrawPowerConfirmScreen()
+    {
+        Clear();
+        DrawText("ВЫКЛЮЧИТЬ ПРИБОР?", 13, 14);
+
+        DrawText("ДА - ", 44, 29);
+
+        int cx = 78;
+        int cy = 33;
+
+        SetPixel(cx - 2, cy - 4, true);
+        SetPixel(cx - 3, cy - 3, true);
+        SetPixel(cx - 4, cy - 2, true);
+        SetPixel(cx - 4, cy - 1, true);
+        SetPixel(cx - 4, cy,     true);
+        SetPixel(cx - 4, cy + 1, true);
+        SetPixel(cx - 4, cy + 2, true);
+        SetPixel(cx - 3, cy + 3, true);
+        SetPixel(cx - 2, cy + 4, true);
+        SetPixel(cx - 1, cy + 4, true);
+        SetPixel(cx,     cy + 4, true);
+        SetPixel(cx + 1, cy + 4, true);
+        SetPixel(cx + 2, cy + 4, true);
+        SetPixel(cx + 3, cy + 3, true);
+        SetPixel(cx + 4, cy + 2, true);
+        SetPixel(cx + 4, cy + 1, true);
+        SetPixel(cx + 4, cy,     true);
+        SetPixel(cx + 4, cy - 1, true);
+        SetPixel(cx + 4, cy - 2, true);
+        SetPixel(cx + 3, cy - 3, true);
+        SetPixel(cx + 2, cy - 4, true);
+
+        DrawVLine(cx, cy - 5, cy, true);
+
+        DrawText("НЕТ - ЛЮБАЯ ДРУГАЯ", 10, 46);
     }
 
     public void DrawCableTableScreen(int selectedIndex = 3)
@@ -380,7 +503,7 @@ public class LcdDisplayBuffer
     public void DrawParametersScreen(DeviceState state)
     {
         Clear();
-        DrawText("ПАРАМЕТРЫ ТРАКТА", 20, 2);
+        DrawText("ПАРАМЕТРЫ ТРАКТА", 18, 2);
         DrawHLine(0, ScreenWidth - 1, 11, true);
 
         DrawText($"Диапазон = {state.Range}", 4, 14);

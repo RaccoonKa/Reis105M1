@@ -8,6 +8,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using Reis105M1.Core.Engine;
 using Reis105M1.Core.Models;
 using Reis105M1.Display;
@@ -33,25 +34,43 @@ public partial class MainWindow : Window
     private readonly List<TutorialStep> _steps;
     private readonly Dictionary<string, KeyDocumentation> _keysDoc;
 
+    private PathFigure _leadRedFigure = null!;
+    private BezierSegment _leadRedBezier = null!;
+    private PathFigure _leadBlackFigure = null!;
+    private BezierSegment _leadBlackBezier = null!;
+
     private int _currentStepIndex = 0;
     private int _selectedPort = 1;
-    private bool _isCrocodilesConnected = false;
+    private bool _isCrocodilesClamped = false;
+    private int _activeCursor = 0;
+    private int _zoomFactor = 1;
+    private bool _isTurbo = false;
+    private int _pulseWidthNs = 125;
+    private int _menuIndex = 0;
+    private int _memoryIndex = 1;
+    private int _baselineShift = 0;
+    private int _outputImpedanceIndex = 1;
+    private static readonly int[] ImpedanceValues = { 20, 100, 200, 300, 400, 500 };
+
+    private string? _transientBadge = null;
+    private DispatcherTimer? _badgeTimer;
 
     private SoundPlayer? _clickSoundPlayer;
 
     public MainWindow()
     {
         InitializeComponent();
+        InitializeLeadGeometries();
         InitializeAssets();
 
         _state = new DeviceState
         {
             IsPoweredOn = true,
             Range = MeasurementRange.Range100m,
-            ShorteningFactor = 1.500,
+            ShorteningFactor = 1.379,
             GainDb = 20,
             Cursor1Position = 0.0,
-            Cursor2Position = 50.0
+            Cursor2Position = 42.5
         };
 
         _engine = new ReflectometryEngine();
@@ -63,7 +82,7 @@ public partial class MainWindow : Window
             new TutorialStep(
                 "Назначение прибора и подготовка",
                 MeasurementRange.Range100m,
-                1.500,
+                1.379,
                 0.0,
                 50.0,
                 new List<CableDefect>()
@@ -71,7 +90,7 @@ public partial class MainWindow : Window
             new TutorialStep(
                 "Подключение зажимов к жилам",
                 MeasurementRange.Range100m,
-                1.500,
+                1.379,
                 0.0,
                 70.0,
                 new List<CableDefect> { new CableDefect(70.0, DefectType.OpenCircuit, 0.9) }
@@ -79,7 +98,7 @@ public partial class MainWindow : Window
             new TutorialStep(
                 "Подключение к рефлектометру",
                 MeasurementRange.Range100m,
-                1.500,
+                1.379,
                 0.0,
                 70.0,
                 new List<CableDefect> { new CableDefect(70.0, DefectType.OpenCircuit, 0.9) }
@@ -87,7 +106,7 @@ public partial class MainWindow : Window
             new TutorialStep(
                 "Включение и калибровка шкалы",
                 MeasurementRange.Range100m,
-                1.500,
+                1.379,
                 0.0,
                 70.0,
                 new List<CableDefect> { new CableDefect(70.0, DefectType.OpenCircuit, 0.9) }
@@ -95,7 +114,7 @@ public partial class MainWindow : Window
             new TutorialStep(
                 "Настройка координатной сетки",
                 MeasurementRange.Range100m,
-                1.500,
+                1.379,
                 0.0,
                 70.0,
                 new List<CableDefect> { new CableDefect(70.0, DefectType.OpenCircuit, 0.9) }
@@ -103,7 +122,7 @@ public partial class MainWindow : Window
             new TutorialStep(
                 "Библиотека кабелей и выбор КУ",
                 MeasurementRange.Range100m,
-                1.500,
+                1.379,
                 0.0,
                 70.0,
                 new List<CableDefect> { new CableDefect(70.0, DefectType.OpenCircuit, 0.9) }
@@ -111,7 +130,7 @@ public partial class MainWindow : Window
             new TutorialStep(
                 "Локализация обрыва жилы",
                 MeasurementRange.Range100m,
-                1.500,
+                1.379,
                 0.0,
                 65.0,
                 new List<CableDefect> { new CableDefect(65.0, DefectType.OpenCircuit, 0.9) }
@@ -119,7 +138,7 @@ public partial class MainWindow : Window
             new TutorialStep(
                 "Локализация короткого замыкания (КЗ)",
                 MeasurementRange.Range100m,
-                1.500,
+                1.379,
                 0.0,
                 42.5,
                 new List<CableDefect> { new CableDefect(42.5, DefectType.ShortCircuit, 0.95) }
@@ -128,6 +147,11 @@ public partial class MainWindow : Window
 
         _keysDoc = new Dictionary<string, KeyDocumentation>
         {
+            ["OUTPUT_IMPEDANCE"] = new KeyDocumentation(
+                "ВЫХОД СОПР (Регулировка выходного сопротивления)",
+                "Плавная подстройка выходного сопротивления генератора импульсов от 20 Ом (MIN) до 500 Ом (MAX).",
+                "Служит для согласования выходного тракта рефлектометра с волновым сопротивлением исследуемой линии. Точное согласование подавляет ложные повторные отражения от начала кабеля и позволяет различить дефекты вблизи прибора."
+            ),
             ["GAIN_PLUS"] = new KeyDocumentation(
                 "УСИЛЕНИЕ △", 
                 "Увеличение усиления входного тракта рефлектометра с шагом 6 дБ (до +60 дБ).", 
@@ -240,10 +264,38 @@ public partial class MainWindow : Window
             )
         };
 
+        _badgeTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(2.0)
+        };
+        _badgeTimer.Tick += (s, e) =>
+        {
+            _badgeTimer.Stop();
+            _transientBadge = null;
+            RenderScreen();
+        };
+
         LcdImage.Source = _lcdBuffer.Bitmap;
         StepsListBox.SelectedIndex = 0;
-        SetCrocodilesConnected(false, animate: false);
+        SetCrocodilesClamped(false, animate: false);
         ApplyStep(0);
+    }
+
+    private void InitializeLeadGeometries()
+    {
+        var redGeom = new PathGeometry();
+        _leadRedFigure = new PathFigure { StartPoint = new Point(445, 170) };
+        _leadRedBezier = new BezierSegment(new Point(420, 170), new Point(405, 195), new Point(400, 205), true);
+        _leadRedFigure.Segments.Add(_leadRedBezier);
+        redGeom.Figures.Add(_leadRedFigure);
+        CrocodileLeadRed.Data = redGeom;
+
+        var blackGeom = new PathGeometry();
+        _leadBlackFigure = new PathFigure { StartPoint = new Point(445, 240) };
+        _leadBlackBezier = new BezierSegment(new Point(420, 240), new Point(405, 215), new Point(400, 205), true);
+        _leadBlackFigure.Segments.Add(_leadBlackBezier);
+        blackGeom.Figures.Add(_leadBlackFigure);
+        CrocodileLeadBlack.Data = blackGeom;
     }
 
     private static Stream? FindAssetStream(string extension, string subfolderHint)
@@ -426,95 +478,97 @@ public partial class MainWindow : Window
         catch { }
     }
 
+    private void ShowBadge(string text)
+    {
+        _transientBadge = text;
+        _badgeTimer?.Stop();
+        _badgeTimer?.Start();
+    }
+
     private string GetStepDescription(int stepIndex, int port)
     {
         var portName = port == 2 ? "ВХОД 2" : "ВХОД 1";
 
         return stepIndex switch
         {
-            0 => "РЕЙС-105М1 — цифровой импульсный рефлектометр для обнаружения повреждений и неоднородностей в силовых кабелях и линиях связи. Перед подключением зажимов убедитесь, что линия отключена с обеих сторон и разряжена. Нажмите «Далее ▶», чтобы подключить измерительные зажимы к исследуемой паре жил кабеля.",
-            1 => "Зажимы типа «крокодил» подключены к исследуемой паре жил кабеля: красный зажим («ВХОД / СИГНАЛ») соединен с первой жилой, черный зажим («ЗЕМЛЯ / ЭКРАН») — со второй жилой. Зондирующий импульс направляется непосредственно в исследуемую линию.",
+            0 => "РЕЙС-105М1 — цифровой импульсный рефлектометр для обнаружения повреждений и неоднородностей в силовых кабелях и линиях связи. На начальном этапе линия обязательно отключается с обеих сторон, а жилы разряжаются. Зажимы 'крокодил' пока отведены и отключены от жил кабеля.",
+            1 => "Зажимы 'крокодил' плавно подключены к измеряемой паре жил: красный зажим надежно обжимает сигнальную жилу, черный зажим — вторую жилу пары. Теперь зондирующий импульс рефлектометра сможет распространяться по исследуемой линии.",
             2 => port == 0 
-                ? "Присоединительный кабель отключен от рефлектометра. Выберите ВХОД 1 или ВХОД 2, чтобы соединить линию со схемой прибора."
+                ? "Присоединительный кабель отключен от рефлектометра. Выберите ВХОД 1 или ВХОД 2 в блоке подключения, чтобы направить сигнал в соответствующий канал."
                 : port == 2
-                    ? "Присоединительный кабель BNC-разъемом подключен к гнезду ВХОД 2 на верхнем торце. Прибор проводит одиночные измерения через ВХОД 2 с той же точностью, что и через ВХОД 1 — оба входа схемотехнически равнозначны."
-                    : "Присоединительный кабель подключен к разъему ВХОД 1 на верхнем торце. Сигнал от выбранных жил поступает в первый измерительный тракт рефлектометра.",
-            3 => $"При нажатии кнопки питания прибор проводит внутреннюю автокалибровку. На монохромном ЖК-дисплее 128x64 формируется координатная сетка и линия нуля. Отраженный сигнал от исследуемой кабельной пары принимается трактом {portName}.",
-            4 => $"Координатная сетка дисплея для канала {portName} переключается кнопками прибора между 3 режимами: 1) Засечки (быстрая визуальная шкала делений через каждые 16 пикселей); 2) Клетки (полная сетка 8х4 для измерения амплитуды в вольтах); 3) Без сетки (чистый экран для поиска мелких дефектов без визуальных помех).",
-            5 => $"Для точного вычисления дистанции по каналу {portName} необходимо установить коэффициент укорочения (КУ). В приборе есть энергонезависимая память до 64 типов линий. Кликните меню или кнопку укорочения, чтобы выбрать значение КУ под марку линии.",
-            6 => $"При обрыве или разомкнутом конце линии отраженный импульс имеет ту же полярность, что и зондирующий (направлен вверх). Рефлектометр по каналу {portName} регистрирует импульс обрыва на дистанции L = 65.0 м. Курсор 0 совмещается с началом импульса, курсор 1 — с фронтом отражения.",
-            7 => $"При коротком замыкании между жилами или жилы на броню отраженный импульс меняет полярность на противоположную (направлен строго вниз). На канале {portName} курсор 1 наводится на начало перегиба импульса КЗ, и оператор получает точную дистанцию L = 42.5 м до аварийного участка.",
+                    ? "Присоединительный кабель BNC-разъемом подключен к гнезду ВХОД 2 на верхнем торце прибора. Измерения проводятся через тракт ВХОД 2 с той же точностью, что и через ВХОД 1."
+                    : "Присоединительный кабель подключен к разъему ВХОД 1 на верхнем торце прибора. Сигнал от жил кабеля поступает в первый измерительный тракт рефлектометра.",
+            3 => $"При нажатии кнопки питания рефлектометр проводит автоматическую калибровку внутренних генераторов. На ЖК-дисплее 128x64 формируется координатная сетка, линия нуля и отраженная волна от тракта {portName}.",
+            4 => $"Координатная сетка дисплея для канала {portName} служит для отсчета амплитуд и масштаба. Кнопками панели прибора можно детально исследовать графики неоднородностей линии.",
+            5 => $"Для точного вычисления расстояния необходимо установить коэффициент укорочения (КУ). В энергонезависимой памяти прибора заложено до 64 типов кабелей (РК-50, РК-75, ФКБ, телефонные и силовые кабели). Скорость волны зависит от диэлектрика (V = c / γ).",
+            6 => $"При обрыве жилы отраженный импульс имеет ту же полярность, что и зондирующий (направлен вверх). Рефлектометр по каналу {portName} регистрирует импульс обрыва на дистанции L = 65.0 м. Курсор 0 совмещается с началом импульса, курсор 1 — с фронтом отражения.",
+            7 => $"При коротком замыкании (КЗ) между жилами отраженный импульс меняет полярность на противоположную (направлен строго вниз). На канале {portName} курсор 1 наводится на точку перегиба импульса КЗ, и оператор получает точную дистанцию L = 42.5 м до аварийного участка.",
             _ => string.Empty
         };
     }
 
-    private void SetCrocodilesConnected(bool connected, bool animate = true)
+    private void SetCrocodilesClamped(bool isClamped, bool animate = true)
     {
-        _isCrocodilesConnected = connected;
+        _isCrocodilesClamped = isClamped;
 
-        double targetRedX = connected ? 255.0 : 330.0;
-        double targetRedY = connected ? 149.0 : 230.0;
-        double targetBlackX = connected ? 255.0 : 330.0;
-        double targetBlackY = connected ? 220.0 : 285.0;
+        double targetRedX = isClamped ? 250.0 : 330.0;
+        double targetBlackX = isClamped ? 250.0 : 330.0;
 
-        Point redStart = connected ? new Point(375, 170) : new Point(450, 250);
-        Point redP1 = connected ? new Point(400, 170) : new Point(440, 250);
-        Point redP2 = connected ? new Point(420, 205) : new Point(435, 225);
+        Point targetRedStart = isClamped ? new Point(365, 170) : new Point(445, 170);
+        Point targetRedP1 = isClamped ? new Point(385, 170) : new Point(420, 170);
+        Point targetRedP2 = isClamped ? new Point(395, 195) : new Point(405, 195);
 
-        Point blackStart = connected ? new Point(375, 241) : new Point(450, 305);
-        Point blackP1 = connected ? new Point(400, 241) : new Point(440, 305);
-        Point blackP2 = connected ? new Point(420, 224) : new Point(435, 230);
+        Point targetBlackStart = isClamped ? new Point(365, 240) : new Point(445, 240);
+        Point targetBlackP1 = isClamped ? new Point(385, 240) : new Point(420, 240);
+        Point targetBlackP2 = isClamped ? new Point(395, 215) : new Point(405, 215);
 
-        if (!animate)
+        TxtInfoClips.Text = isClamped ? "Подключены (Жилы 1-2)" : "Отключены";
+        TxtInfoClips.Foreground = isClamped 
+            ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#38BDF8")) 
+            : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F59E0B"));
+
+        if (animate)
         {
-            Canvas.SetLeft(CrocodileRed, targetRedX);
-            Canvas.SetTop(CrocodileRed, targetRedY);
-            Canvas.SetLeft(CrocodileBlack, targetBlackX);
-            Canvas.SetTop(CrocodileBlack, targetBlackY);
+            var duration = TimeSpan.FromMilliseconds(420);
+            var ease = new QuadraticEase { EasingMode = EasingMode.EaseInOut };
 
-            CrocodileLeadRedFigure.StartPoint = redStart;
-            CrocodileLeadRedBezier.Point1 = redP1;
-            CrocodileLeadRedBezier.Point2 = redP2;
+            var animRedX = new DoubleAnimation(targetRedX, duration) { EasingFunction = ease };
+            var animBlackX = new DoubleAnimation(targetBlackX, duration) { EasingFunction = ease };
 
-            CrocodileLeadBlackFigure.StartPoint = blackStart;
-            CrocodileLeadBlackBezier.Point1 = blackP1;
-            CrocodileLeadBlackBezier.Point2 = blackP2;
-            return;
+            var animRedStart = new PointAnimation(targetRedStart, duration) { EasingFunction = ease };
+            var animRedP1 = new PointAnimation(targetRedP1, duration) { EasingFunction = ease };
+            var animRedP2 = new PointAnimation(targetRedP2, duration) { EasingFunction = ease };
+
+            var animBlackStart = new PointAnimation(targetBlackStart, duration) { EasingFunction = ease };
+            var animBlackP1 = new PointAnimation(targetBlackP1, duration) { EasingFunction = ease };
+            var animBlackP2 = new PointAnimation(targetBlackP2, duration) { EasingFunction = ease };
+
+            CrocodileRed.BeginAnimation(Canvas.LeftProperty, animRedX);
+            CrocodileBlack.BeginAnimation(Canvas.LeftProperty, animBlackX);
+
+            _leadRedFigure.BeginAnimation(PathFigure.StartPointProperty, animRedStart);
+            _leadRedBezier.BeginAnimation(BezierSegment.Point1Property, animRedP1);
+            _leadRedBezier.BeginAnimation(BezierSegment.Point2Property, animRedP2);
+
+            _leadBlackFigure.BeginAnimation(PathFigure.StartPointProperty, animBlackStart);
+            _leadBlackBezier.BeginAnimation(BezierSegment.Point1Property, animBlackP1);
+            _leadBlackBezier.BeginAnimation(BezierSegment.Point2Property, animBlackP2);
+        }
+        else
+        {
+            CrocodileRed.SetValue(Canvas.LeftProperty, targetRedX);
+            CrocodileBlack.SetValue(Canvas.LeftProperty, targetBlackX);
+
+            _leadRedFigure.StartPoint = targetRedStart;
+            _leadRedBezier.Point1 = targetRedP1;
+            _leadRedBezier.Point2 = targetRedP2;
+
+            _leadBlackFigure.StartPoint = targetBlackStart;
+            _leadBlackBezier.Point1 = targetBlackP1;
+            _leadBlackBezier.Point2 = targetBlackP2;
         }
 
-        var duration = TimeSpan.FromMilliseconds(450);
-        var ease = new QuadraticEase { EasingMode = EasingMode.EaseInOut };
-
-        var animRedX = new DoubleAnimation(targetRedX, duration) { EasingFunction = ease };
-        var animRedY = new DoubleAnimation(targetRedY, duration) { EasingFunction = ease };
-        var animBlackX = new DoubleAnimation(targetBlackX, duration) { EasingFunction = ease };
-        var animBlackY = new DoubleAnimation(targetBlackY, duration) { EasingFunction = ease };
-
-        CrocodileRed.BeginAnimation(Canvas.LeftProperty, animRedX);
-        CrocodileRed.BeginAnimation(Canvas.TopProperty, animRedY);
-        CrocodileBlack.BeginAnimation(Canvas.LeftProperty, animBlackX);
-        CrocodileBlack.BeginAnimation(Canvas.TopProperty, animBlackY);
-
-        var animRedStart = new PointAnimation(redStart, duration) { EasingFunction = ease };
-        var animRedP1 = new PointAnimation(redP1, duration) { EasingFunction = ease };
-        var animRedP2 = new PointAnimation(redP2, duration) { EasingFunction = ease };
-
-        CrocodileLeadRedFigure.BeginAnimation(PathFigure.StartPointProperty, animRedStart);
-        CrocodileLeadRedBezier.BeginAnimation(BezierSegment.Point1Property, animRedP1);
-        CrocodileLeadRedBezier.BeginAnimation(BezierSegment.Point2Property, animRedP2);
-
-        var animBlackStart = new PointAnimation(blackStart, duration) { EasingFunction = ease };
-        var animBlackP1 = new PointAnimation(blackP1, duration) { EasingFunction = ease };
-        var animBlackP2 = new PointAnimation(blackP2, duration) { EasingFunction = ease };
-
-        CrocodileLeadBlackFigure.BeginAnimation(PathFigure.StartPointProperty, animBlackStart);
-        CrocodileLeadBlackBezier.BeginAnimation(BezierSegment.Point1Property, animBlackP1);
-        CrocodileLeadBlackBezier.BeginAnimation(BezierSegment.Point2Property, animBlackP2);
-
-        if (connected)
-        {
-            _clickSoundPlayer?.Play();
-        }
+        RenderScreen();
     }
 
     private void ApplyStep(int index)
@@ -529,18 +583,7 @@ public partial class MainWindow : Window
 
         var activePort = (_selectedPort == 0 && index > 2) ? 1 : _selectedPort;
 
-        if (index == 0)
-        {
-            SetCrocodilesConnected(false, animate: true);
-            TxtInfoClips.Text = "Отключены";
-            TxtInfoClips.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F59E0B"));
-        }
-        else
-        {
-            SetCrocodilesConnected(true, animate: true);
-            TxtInfoClips.Text = "Подключены";
-            TxtInfoClips.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#10B981"));
-        }
+        SetCrocodilesClamped(index > 0, animate: true);
 
         if (index == 4)
         {
@@ -593,45 +636,62 @@ public partial class MainWindow : Window
     {
         _lcdBuffer.Clear();
 
-        if (_state.IsPoweredOn)
+        if (!_state.IsPoweredOn)
         {
-            switch (_lcdBuffer.ScreenMode)
-            {
-                case LcdScreenMode.MainMenu:
-                    _lcdBuffer.DrawMainMenuScreen(0);
-                    break;
-                case LcdScreenMode.CableTable:
-                    _lcdBuffer.DrawCableTableScreen(3);
-                    break;
-                case LcdScreenMode.Parameters:
-                    _lcdBuffer.DrawParametersScreen(_state);
-                    break;
-                case LcdScreenMode.Battery:
-                    _lcdBuffer.DrawBatteryScreen(100);
-                    break;
-                default:
-                    _lcdBuffer.DrawGrid();
-                    _lcdBuffer.DrawText($"КУ:{_state.ShorteningFactor:F3}", 2, 2);
-                    _lcdBuffer.DrawText(_selectedPort == 2 ? "ВХОД 2" : "ВХОД 1", 64, 2);
-                    _lcdBuffer.DrawBatteryIcon(112, 2);
+            _lcdBuffer.ClearDark();
+            _lcdBuffer.RenderToBitmap();
+            return;
+        }
 
-                    if (_selectedPort > 0 && _isCrocodilesConnected)
-                    {
-                        var trace = _engine.GenerateTrace(_state, _currentDefects, samplesCount: 128);
-                        _lcdBuffer.DrawTrace(trace, baselineY: 34, scale: 20.0);
+        switch (_lcdBuffer.ScreenMode)
+        {
+            case LcdScreenMode.MainMenu:
+                _lcdBuffer.DrawMainMenuScreen(_menuIndex);
+                break;
+            case LcdScreenMode.Memory:
+                _lcdBuffer.DrawMemoryScreen(_memoryIndex);
+                break;
+            case LcdScreenMode.PowerConfirm:
+                _lcdBuffer.DrawPowerConfirmScreen();
+                break;
+            case LcdScreenMode.CableTable:
+                _lcdBuffer.DrawCableTableScreen(3);
+                break;
+            case LcdScreenMode.Parameters:
+                _lcdBuffer.DrawParametersScreen(_state);
+                break;
+            case LcdScreenMode.Battery:
+                _lcdBuffer.DrawBatteryScreen(100);
+                break;
+            default:
+                _lcdBuffer.DrawGrid();
 
-                        var maxDist = ReflectometryEngine.GetMaxDistanceMeters(_state.Range);
-                        var cursor1Pixel = (int)(_state.Cursor1Position / maxDist * LcdDisplayBuffer.ScreenWidth);
-                        var cursor2Pixel = (int)(_state.Cursor2Position / maxDist * LcdDisplayBuffer.ScreenWidth);
+                string portHeader = _selectedPort == 2 ? "ВХОД 2" : "ВХОД 1";
+                _lcdBuffer.DrawTraceHeader(portHeader, _state.ShorteningFactor);
 
-                        _lcdBuffer.DrawCursor(cursor1Pixel, isDotted: false);
-                        _lcdBuffer.DrawCursor(cursor2Pixel, isDotted: true);
-                    }
+                double activeCurPos = _activeCursor == 0 ? _state.Cursor1Position : _state.Cursor2Position;
+                _lcdBuffer.DrawTraceFooter(_state.MeasuredDistance, _activeCursor, activeCurPos, _transientBadge);
 
-                    _lcdBuffer.DrawText($"L={_state.MeasuredDistance:F2}м", 2, 54);
-                    _lcdBuffer.DrawText("КУРСОР 1", 76, 54, invert: true);
-                    break;
-            }
+                if (_selectedPort > 0 && _isCrocodilesClamped && _currentStepIndex > 0)
+                {
+                    var trace = _engine.GenerateTrace(_state, _currentDefects, samplesCount: 128);
+                    double baseScale = 22.0 + (_state.GainDb - 20) * 0.9;
+                    if (_isTurbo) baseScale *= 1.7;
+
+                    _lcdBuffer.DrawTrace(trace, baselineY: 38 + _baselineShift, scale: baseScale);
+
+                    var maxDist = ReflectometryEngine.GetMaxDistanceMeters(_state.Range);
+                    var cursor1Pixel = (int)(_state.Cursor1Position / maxDist * LcdDisplayBuffer.ScreenWidth);
+                    var cursor2Pixel = (int)(_state.Cursor2Position / maxDist * LcdDisplayBuffer.ScreenWidth);
+
+                    _lcdBuffer.DrawCursor(cursor1Pixel, isDotted: false);
+                    _lcdBuffer.DrawCursor(cursor2Pixel, isDotted: true);
+                }
+                else
+                {
+                    _lcdBuffer.DrawHLine(0, LcdDisplayBuffer.ScreenWidth - 1, 38 + _baselineShift, true);
+                }
+                break;
         }
 
         _lcdBuffer.RenderToBitmap();
@@ -686,11 +746,11 @@ public partial class MainWindow : Window
         CablePlug.BeginAnimation(Canvas.TopProperty, animY);
 
         var p2X = port == 2 ? 663.0 : 557.0;
-        var p1X = port == 2 ? 490.0 : 475.0;
+        var p1X = port == 2 ? 470.0 : 455.0;
 
         var animCableP3 = new PointAnimation(new Point(endX, targetY), duration) { EasingFunction = ease };
         var animCableP2 = new PointAnimation(new Point(p2X, targetY - 66), duration) { EasingFunction = ease };
-        var animCableP1 = new PointAnimation(new Point(p1X, 205), duration) { EasingFunction = ease };
+        var animCableP1 = new PointAnimation(new Point(p1X, 200), duration) { EasingFunction = ease };
 
         var animShadowP3 = new PointAnimation(new Point(endX, targetY + 10), duration) { EasingFunction = ease };
         var animShadowP2 = new PointAnimation(new Point(p2X, targetY - 56), duration) { EasingFunction = ease };
@@ -713,7 +773,12 @@ public partial class MainWindow : Window
 
     private void OnKeyInspectClicked(object sender, RoutedEventArgs e)
     {
-        if (sender is FrameworkElement element && element.Tag is string keyTag && _keysDoc.TryGetValue(keyTag, out var doc))
+        if (sender is not FrameworkElement element || element.Tag is not string keyTag)
+        {
+            return;
+        }
+
+        if (_keysDoc.TryGetValue(keyTag, out var doc))
         {
             TxtInspectorKeyTitle.Text = doc.Title;
             TxtInspectorSummary.Text = doc.Summary;
@@ -723,11 +788,221 @@ public partial class MainWindow : Window
             {
                 From = (Color)ColorConverter.ConvertFromString("#38BDF8"),
                 To = (Color)ColorConverter.ConvertFromString("#0284C7"),
-                Duration = TimeSpan.FromMilliseconds(300),
+                Duration = TimeSpan.FromMilliseconds(250),
                 AutoReverse = true
             };
             InspectorCard.BorderBrush.BeginAnimation(SolidColorBrush.ColorProperty, flashAnim);
         }
+
+        if (_lcdBuffer.ScreenMode == LcdScreenMode.PowerConfirm)
+        {
+            if (keyTag == "POWER")
+            {
+                _state.IsPoweredOn = false;
+                _lcdBuffer.ScreenMode = LcdScreenMode.Trace;
+            }
+            else
+            {
+                _lcdBuffer.ScreenMode = LcdScreenMode.Trace;
+            }
+            RenderScreen();
+            return;
+        }
+
+        if (!_state.IsPoweredOn)
+        {
+            if (keyTag == "POWER")
+            {
+                _state.IsPoweredOn = true;
+                _lcdBuffer.ScreenMode = LcdScreenMode.Trace;
+                ShowBadge("РЕЙС-105М1");
+                RenderScreen();
+            }
+            return;
+        }
+
+        switch (keyTag)
+        {
+            case "OUTPUT_IMPEDANCE":
+                _outputImpedanceIndex = (_outputImpedanceIndex + 1) % ImpedanceValues.Length;
+                int currentR = ImpedanceValues[_outputImpedanceIndex];
+                string rText = currentR == 20 ? "MIN (20 Ом)" : (currentR == 500 ? "MAX (500 Ом)" : $"{currentR} Ом");
+                ShowBadge($"R={rText}");
+                break;
+
+            case "POWER":
+                _lcdBuffer.ScreenMode = LcdScreenMode.PowerConfirm;
+                break;
+
+            case "BACKLIGHT":
+                _lcdBuffer.CycleBacklight();
+                ShowBadge($"ЯРК.{_lcdBuffer.BacklightLevel + 1}/3");
+                break;
+
+            case "CURSOR_TOGGLE":
+                _activeCursor = 1 - _activeCursor;
+                _lcdBuffer.ActiveCursorIndex = _activeCursor;
+                ShowBadge(_activeCursor == 0 ? "КУРСОР 0" : "КУРСОР 1");
+                break;
+
+            case "CURSOR_LEFT":
+                if (_activeCursor == 0)
+                {
+                    _state.Cursor1Position = Math.Max(0.0, _state.Cursor1Position - 1.0);
+                }
+                else
+                {
+                    _state.Cursor2Position = Math.Max(_state.Cursor1Position, _state.Cursor2Position - 1.0);
+                }
+                TxtInfoDistance.Text = $"{_state.MeasuredDistance:F2} м";
+                _transientBadge = null;
+                break;
+
+            case "CURSOR_RIGHT":
+                var maxDist = ReflectometryEngine.GetMaxDistanceMeters(_state.Range);
+                if (_activeCursor == 0)
+                {
+                    _state.Cursor1Position = Math.Min(_state.Cursor2Position, _state.Cursor1Position + 1.0);
+                }
+                else
+                {
+                    _state.Cursor2Position = Math.Min(maxDist, _state.Cursor2Position + 1.0);
+                }
+                TxtInfoDistance.Text = $"{_state.MeasuredDistance:F2} м";
+                _transientBadge = null;
+                break;
+
+            case "GAIN_PLUS":
+                _state.GainDb = Math.Min(60, _state.GainDb + 6);
+                ShowBadge($"УС +{_state.GainDb}dB");
+                break;
+
+            case "GAIN_MINUS":
+                _state.GainDb = Math.Max(0, _state.GainDb - 6);
+                ShowBadge($"УС +{_state.GainDb}dB");
+                break;
+
+            case "RANGE_PLUS":
+                int curRange = (int)_state.Range;
+                if (curRange < 11)
+                {
+                    _state.Range = (MeasurementRange)(curRange + 1);
+                }
+                TxtInfoRange.Text = $"{ReflectometryEngine.GetMaxDistanceMeters(_state.Range):F1} м";
+                ShowBadge($"D={ReflectometryEngine.GetMaxDistanceMeters(_state.Range):F0}м");
+                break;
+
+            case "RANGE_MINUS":
+                int curRangeMin = (int)_state.Range;
+                if (curRangeMin > 0)
+                {
+                    _state.Range = (MeasurementRange)(curRangeMin - 1);
+                }
+                TxtInfoRange.Text = $"{ReflectometryEngine.GetMaxDistanceMeters(_state.Range):F1} м";
+                ShowBadge($"D={ReflectometryEngine.GetMaxDistanceMeters(_state.Range):F0}м");
+                break;
+
+            case "ZOOM_PLUS":
+                _zoomFactor = Math.Min(8, _zoomFactor * 2);
+                ShowBadge($"КУ х{_zoomFactor}");
+                break;
+
+            case "ZOOM_MINUS":
+                _zoomFactor = Math.Max(1, _zoomFactor / 2);
+                ShowBadge($"КУ х{_zoomFactor}");
+                break;
+
+            case "SHORTENING_PLUS":
+                _state.ShorteningFactor = Math.Round(_state.ShorteningFactor + 0.001, 3);
+                TxtInfoShortening.Text = $"{_state.ShorteningFactor:F3}";
+                ShowBadge($"γ={_state.ShorteningFactor:F3}");
+                break;
+
+            case "SHORTENING_MINUS":
+                _state.ShorteningFactor = Math.Round(Math.Max(1.000, _state.ShorteningFactor - 0.001), 3);
+                TxtInfoShortening.Text = $"{_state.ShorteningFactor:F3}";
+                ShowBadge($"γ={_state.ShorteningFactor:F3}");
+                break;
+
+            case "MENU_OK":
+                if (_lcdBuffer.ScreenMode == LcdScreenMode.Trace)
+                {
+                    _lcdBuffer.ScreenMode = LcdScreenMode.MainMenu;
+                }
+                else if (_lcdBuffer.ScreenMode == LcdScreenMode.MainMenu)
+                {
+                    if (_menuIndex == 1) _lcdBuffer.ScreenMode = LcdScreenMode.Battery;
+                    else if (_menuIndex == 2) _lcdBuffer.ScreenMode = LcdScreenMode.CableTable;
+                    else if (_menuIndex == 7) _lcdBuffer.ScreenMode = LcdScreenMode.Parameters;
+                    else _lcdBuffer.ScreenMode = LcdScreenMode.Trace;
+                }
+                else
+                {
+                    _lcdBuffer.ScreenMode = LcdScreenMode.Trace;
+                }
+                break;
+
+            case "MEMORY":
+                _lcdBuffer.ScreenMode = _lcdBuffer.ScreenMode == LcdScreenMode.Memory 
+                    ? LcdScreenMode.Trace 
+                    : LcdScreenMode.Memory;
+                break;
+
+            case "TURBO":
+                _isTurbo = !_isTurbo;
+                ShowBadge(_isTurbo ? "ТУРБО ВКЛ" : "ТУРБО ВЫКЛ");
+                break;
+
+            case "PULSE_PLUS":
+                _pulseWidthNs = Math.Min(5000, _pulseWidthNs * 2);
+                ShowBadge($"ИМП {_pulseWidthNs}нс");
+                break;
+
+            case "PULSE_MINUS":
+                _pulseWidthNs = Math.Max(10, _pulseWidthNs / 2);
+                ShowBadge($"ИМП {_pulseWidthNs}нс");
+                break;
+
+            case "COMP_PLUS":
+                ShowBadge("КОМП +");
+                break;
+
+            case "COMP_MINUS":
+                ShowBadge("КОМП -");
+                break;
+
+            case "NAV_UP":
+                if (_lcdBuffer.ScreenMode == LcdScreenMode.MainMenu)
+                {
+                    _menuIndex = Math.Max(0, _menuIndex - 1);
+                }
+                else if (_lcdBuffer.ScreenMode == LcdScreenMode.Memory)
+                {
+                    _memoryIndex = Math.Max(0, _memoryIndex - 1);
+                }
+                else
+                {
+                    _baselineShift = Math.Min(10, _baselineShift + 2);
+                }
+                break;
+
+            case "NAV_DOWN":
+                if (_lcdBuffer.ScreenMode == LcdScreenMode.MainMenu)
+                {
+                    _menuIndex = Math.Min(9, _menuIndex + 1);
+                }
+                else if (_lcdBuffer.ScreenMode == LcdScreenMode.Memory)
+                {
+                    _memoryIndex = Math.Min(5, _memoryIndex + 1);
+                }
+                else
+                {
+                    _baselineShift = Math.Max(-10, _baselineShift - 2);
+                }
+                break;
+        }
+
+        RenderScreen();
     }
 
     private void OnSelectPort1Clicked(object sender, RoutedEventArgs e)
